@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7e7e6">
+<meta name="robots" content="noindex, nofollow">
+<title>Anel da Karolina ♡</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%8D%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="bg-hearts" aria-hidden="true">
+  <span>♥</span><span>♥</span><span>♥</span><span>♥</span>
+</div>
+
+<div id="shell">
+
+  <header class="site">
+    <h1>Anel da Karolina ♡</h1>
+    <p class="sub">este ou aquele?</p>
+  </header>
+
+  <main>
+
+    <!-- ── Jogo ─────────────────────────────────────────────── -->
+    <section id="scr-game" class="screen">
+      <div class="arena" id="arena">
+        <button class="card" id="card0" type="button" aria-label="Escolher este">
+          <img id="img0" alt="" decoding="async">
+          <span class="pop" aria-hidden="true">♥</span>
+        </button>
+        <button class="card" id="card1" type="button" aria-label="Escolher este">
+          <img id="img1" alt="" decoding="async">
+          <span class="pop" aria-hidden="true">♥</span>
+        </button>
+      </div>
+      <div class="under">
+        <button class="link-btn" id="btn-none" type="button">Nenhum dos dois</button>
+        <button class="link-btn quiet" id="btn-back" type="button" disabled>Anterior</button>
+      </div>
+    </section>
+
+    <!-- ── Pausa às 35 escolhas ─────────────────────────────── -->
+    <section id="scr-pause" class="screen msg" hidden>
+      <h2>Chega por agora, amor?</h2>
+      <div class="row">
+        <button class="btn" id="btn-more" type="button">Mais um bocadinho</button>
+        <button class="btn ghost" id="btn-stop" type="button">Por hoje chega</button>
+      </div>
+    </section>
+
+    <!-- ── Fim (playoff terminado, ou "por hoje chega") ─────── -->
+    <section id="scr-done" class="screen msg" hidden>
+      <h2>Obrigado ♡</h2>
+    </section>
+
+    <!-- ── Erro de carregamento (nunca fala de rede/dados) ──── -->
+    <section id="scr-load" class="screen msg" hidden>
+      <h2>Um momento…</h2>
+    </section>
+
+  </main>
+
+  <footer class="site">feito para ti · N ♡ K</footer>
+
+</div>
+
+<!-- ── Vista do dono ──────────────────────────────────────────── -->
+<section id="admin" hidden></section>
+
+<script src="app.js"></script>
+</body>
+</html>

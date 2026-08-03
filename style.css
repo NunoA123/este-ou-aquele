@@ -1,0 +1,298 @@
+/* ─────────────────────────────────────────────────────────────
+   Anel da Karolina ♡
+   Regra de ouro: a moldura é fofa, a arena é neutra.
+   Nada dentro de .arena pode distinguir um cartão do outro.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  --blush: #f7e7e6;
+  --rose:  #d98f96;
+  --deep:  #7a3b45;
+  --ink:   #3d3235;
+  --cream: #fffdfb;
+  --gold:  #c9a227;
+
+  --serif: "Cormorant Garamond", "Playfair Display", Georgia, "Times New Roman", serif;
+  --ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--ui);
+  color: var(--ink);
+  background: linear-gradient(170deg, var(--blush) 0%, #fdf6f5 45%, #ffffff 100%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+/* Corações de fundo — decoração fixa, longe da arena */
+.bg-hearts {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.bg-hearts span {
+  position: absolute;
+  color: var(--rose);
+  opacity: 0.12;
+  line-height: 1;
+  user-select: none;
+}
+.bg-hearts span:nth-child(1) { top: 4%;  left: 5%;   font-size: 34px; transform: rotate(-14deg); }
+.bg-hearts span:nth-child(2) { top: 7%;  right: 7%;  font-size: 22px; transform: rotate(12deg); }
+.bg-hearts span:nth-child(3) { bottom: 6%; left: 8%;  font-size: 26px; transform: rotate(9deg); }
+.bg-hearts span:nth-child(4) { bottom: 4%; right: 5%; font-size: 38px; transform: rotate(-8deg); }
+
+/* ── Layout geral ───────────────────────────────────────────── */
+
+#shell {
+  position: relative;
+  z-index: 1;
+  height: 100vh;   /* fallback */
+  height: 100dvh;  /* a arena encolhe para caber; a página nunca faz scroll */
+  display: flex;
+  flex-direction: column;
+}
+
+header.site {
+  text-align: center;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--gold);
+  flex: 0 0 auto;
+}
+header.site h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  color: var(--deep);
+  font-size: clamp(21px, 6vw, 32px);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+header.site .sub {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--rose);
+  font-size: clamp(12px, 3.4vw, 16px);
+  margin: 3px 0 0;
+}
+
+main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+footer.site {
+  flex: 0 0 auto;
+  text-align: center;
+  font-family: var(--serif);
+  font-size: 12px;
+  color: var(--rose);
+  opacity: 0.75;
+  padding: 6px 0 10px;
+}
+
+.screen {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.screen[hidden] { display: none; }
+
+/* ── A ARENA ────────────────────────────────────────────────────
+   Tudo aqui dentro é rigorosamente simétrico.
+   Sem serifa, sem texto, sem decoração assimétrica.
+   ───────────────────────────────────────────────────────────── */
+
+.arena {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.8vh, 16px);
+  padding: clamp(6px, 1.4vh, 14px) 0;
+  min-height: 0;
+  transition: opacity 180ms ease;
+}
+.arena.fading { opacity: 0; }
+
+.card {
+  /* Dimensões idênticas, derivadas só do espaço disponível — nunca do
+     conteúdo. Os dois cartões partilham a mesma base flex, por isso a
+     altura é exactamente a mesma; a largura vem do aspect-ratio. */
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: 86vw;
+  aspect-ratio: 1 / 1;
+  width: auto;
+
+  position: relative;
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: 2px solid transparent;
+  border-radius: 18px;
+  background: var(--cream);
+  box-shadow: 0 3px 14px rgba(122, 59, 69, 0.13);
+  overflow: hidden;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+
+.card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.card:focus-visible { outline: none; border-color: var(--rose); }
+.card.chosen { border-color: var(--rose); transform: scale(0.985); }
+
+/* Coração que sobe — idêntico dos dois lados */
+.card .pop {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 40px;
+  color: var(--rose);
+  opacity: 0;
+  pointer-events: none;
+}
+.card.chosen .pop { animation: floatHeart 420ms ease-out forwards; }
+
+@keyframes floatHeart {
+  0%   { opacity: 0;    transform: translate(-50%, -50%) scale(0.6); }
+  35%  { opacity: 0.85; transform: translate(-50%, -78%) scale(1.05); }
+  100% { opacity: 0;    transform: translate(-50%, -120%) scale(1.15); }
+}
+
+/* Horizontal / desktop: lado a lado */
+@media (orientation: landscape), (min-width: 760px) {
+  .arena { flex-direction: row; gap: clamp(12px, 2.5vw, 28px); }
+  .card { flex: 0 1 auto; height: 100%; max-height: none; max-width: 46vw; }
+}
+
+/* ── Controlos por baixo da arena ───────────────────────────── */
+
+.under {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 8px;
+}
+
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 6px 10px;
+  font-family: var(--ui);
+  font-size: 14px;
+  color: var(--rose);
+  cursor: pointer;
+  text-decoration: underline wavy var(--rose);
+  text-underline-offset: 4px;
+}
+.link-btn.quiet {
+  font-size: 12.5px;
+  color: var(--rose);
+  opacity: 0.6;
+  text-decoration: none;
+}
+.link-btn.quiet[disabled] { opacity: 0.22; cursor: default; }
+
+/* ── Ecrãs de pausa / fim ───────────────────────────────────── */
+
+.msg {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  text-align: center;
+  padding: 24px;
+}
+.msg h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  color: var(--deep);
+  font-size: clamp(28px, 9vw, 46px);
+  margin: 0;
+  line-height: 1.2;
+}
+.msg .row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+
+.btn {
+  font-family: var(--ui);
+  font-size: 15px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1px solid var(--rose);
+  background: var(--rose);
+  color: #fff;
+  cursor: pointer;
+}
+.btn.ghost { background: transparent; color: var(--deep); border-color: var(--gold); }
+
+/* ── Vista de admin — folha de cálculo, não cartão ──────────── */
+
+#admin {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #fff;
+  color: #111;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  overflow-y: auto;
+  padding: 12px;
+}
+#admin[hidden] { display: none; }
+#admin h2 { font-size: 14px; margin: 20px 0 6px; border-bottom: 1px solid #000; padding-bottom: 3px; }
+#admin h2:first-child { margin-top: 0; }
+#admin table { border-collapse: collapse; width: 100%; margin-bottom: 8px; }
+#admin th, #admin td { border: 1px solid #bbb; padding: 3px 5px; text-align: left; white-space: nowrap; }
+#admin th { background: #eee; }
+#admin td.num { text-align: right; }
+#admin img.thumb { width: 34px; height: 34px; object-fit: cover; display: block; }
+#admin .weak { color: #a00; }
+#admin .warn { background: #ffe9e9; border: 1px solid #c00; padding: 6px 8px; margin-bottom: 10px; }
+#admin .ok { background: #eaffea; border: 1px solid #0a0; padding: 6px 8px; margin-bottom: 10px; }
+#admin .bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+#admin button {
+  font-family: inherit; font-size: 12px; padding: 6px 10px;
+  border: 1px solid #333; background: #f4f4f4; cursor: pointer;
+}
+#admin .scroll { overflow-x: auto; }
+#admin .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+#admin .muted { color: #666; }
+
+@media (prefers-reduced-motion: reduce) {
+  .arena, .card, .card .pop { transition: none !important; animation: none !important; }
+}
