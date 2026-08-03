@@ -8,7 +8,7 @@
    ADMIN_PASS: ofuscação, não segurança. Mudar antes de publicar.
    ────────────────────────────────────────────────────────────── */
 const SYNC_URL   = 'https://script.google.com/macros/s/AKfycbzIB3uKDWEd6TtZjd5gWCNHCMYnIdMu8JRF8i1gsy9I9zbBXpo9lJ46b2B2onJ6GCUzgg/exec';
-const ADMIN_PASS = 'anel2026';
+const ADMIN_PASS = 'mirtilo-quarenta-e-sete';
 
 const STORAGE_KEY    = 'ringduel:state:v1';
 const SESSION_LIMIT  = 35;   // escolhas antes do ecrã de pausa
