@@ -105,11 +105,34 @@ mantém-se — é essa que manda quando está configurada.
 |---|---|---|
 | 1 | algum anel com menos de 3 jogos | aleatório, prioridade a quem tem menos jogos — garante cobertura |
 | 2 | todos com 3+ jogos | só pares dentro de ±120 pontos de Elo — é aqui que está a informação |
-| playoff | manual, botão no admin | round-robin dos 6 primeiros, 15 confrontos, depois acaba |
+| playoff | manual, ver abaixo | round-robin dos 6 primeiros, 15 confrontos, depois acaba |
 
 O grupo do playoff fica **congelado** quando o activas, senão os Elos mexem-se a
 meio e o round-robin nunca fecha. Nenhum par se repete antes de a fase esgotar
 todas as combinações possíveis.
+
+### Activar o playoff
+
+A fase vive no `localStorage` do telemóvel **dela**, por isso não há botão no
+admin que a active à distância. Activa-se com um link:
+
+```
+https://<user>.github.io/este-ou-aquele/#/playoff
+```
+
+Mandas-lhe esse link, ela abre, e o playoff arranca no telemóvel dela. O
+endereço limpa-se sozinho a seguir, e o ecrã é igual ao do costume — ela não vê
+nada de diferente.
+
+Os 6 são congelados no momento em que ela abre, a partir da **folha** (que tem
+tudo). Se a folha estiver inalcançável ou souber menos do que o telemóvel dela,
+usa os Elos locais — nunca congela um top 6 a partir de dados vazios.
+
+O botão `Ativar playoff` no admin não activa nada: mostra-te o top 6 actual e
+copia-te o link para a área de transferência.
+
+Não vale a pena antes de umas 100 comparações — abaixo disso o top 6 ainda é
+ruído e estarias a fechar o assunto com os anéis errados. O admin avisa-te.
 
 K = 32 abaixo de 5 jogos, 16 daí para cima.
 

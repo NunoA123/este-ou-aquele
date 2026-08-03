@@ -217,8 +217,14 @@ function nextPair() {
    Sincronização (silenciosa — nunca aparece nada à jogadora)
    ══════════════════════════════════════════════════════════════ */
 
+/* Uma sincronização de cada vez. O Apps Script demora 2-19s a responder; sem
+   isto, um segundo lote disparado entretanto voltava a levar as mesmas linhas
+   e a folha enchia-se de duplicados. As linhas que ficarem de fora vão no
+   lote seguinte. */
+let syncing = false;
+
 function syncRows(force) {
-  if (!SYNC_URL) return;
+  if (!SYNC_URL || syncing) return;
   const pending = state.history.filter(h => !h.synced);
   if (!pending.length) return;
   if (!force && pending.length < SYNC_BATCH) return;
@@ -228,6 +234,7 @@ function syncRows(force) {
   }));
 
   // Content-Type text/plain evita o preflight, que o Apps Script rejeita.
+  syncing = true;
   fetch(SYNC_URL, {
     method: 'POST',
     mode: 'no-cors',
@@ -238,7 +245,8 @@ function syncRows(force) {
     // resposta opaca: assume êxito se o fetch não rejeitou
     pending.forEach(h => { h.synced = true; });
     save();
-  }).catch(() => { /* fica synced:false e vai no lote seguinte */ });
+  }).catch(() => { /* fica synced:false e vai no lote seguinte */ })
+    .finally(() => { syncing = false; });
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -434,8 +442,45 @@ function wireGame() {
   window.addEventListener('online', () => syncRows(true));
 }
 
+/**
+ * Activa o playoff no dispositivo onde o link for aberto.
+ *
+ * A fase vive no localStorage de quem joga, por isso o botão do admin só
+ * afecta o dispositivo do dono. Este link resolve isso: manda-se o link,
+ * ela abre, e o playoff arranca no telemóvel dela sem ela dar por nada.
+ *
+ * Os 6 são congelados a partir da folha (que tem tudo), com recurso aos
+ * Elos locais se a rede falhar.
+ */
+async function activatePlayoffFromLink() {
+  let ids = null;
+  // comparações que este dispositivo conhece
+  const locais = RINGS.reduce((n, r) => n + (state.games[r.id] || 0), 0) / 2;
+
+  if (SYNC_URL) {
+    try {
+      const raw = await (await fetch(SYNC_URL, { cache: 'no-store' })).json();
+      const calc = recompute(normalizeRemote(raw));
+      // Só usa a folha se ela souber pelo menos tanto quanto o dispositivo.
+      // Uma folha vazia ou truncada congelaria um top 6 sem significado.
+      if (calc.used >= locais && calc.used > 0) {
+        ids = RINGS.slice()
+          .sort((a, b) => calc.ratings[b.id] - calc.ratings[a.id])
+          .slice(0, PLAYOFF_TOP).map(r => r.id);
+      }
+    } catch (e) { ids = null; }
+  }
+  if (!ids || ids.length < 2) ids = topIds(PLAYOFF_TOP);
+
+  state.phase = 'playoff';
+  state.playoffIds = ids;
+  state.sessionCount = 0;
+  save();
+}
+
 async function boot() {
   if (location.hash.startsWith('#/admin')) { await bootAdmin(); return; }
+  const wantsPlayoff = location.hash.startsWith('#/playoff');
 
   showScreen('scr-load');
   try {
@@ -447,6 +492,11 @@ async function boot() {
   if (!RINGS.length) { console.error('rings.json está vazio'); return; }
 
   state = load();
+  if (wantsPlayoff) {
+    await activatePlayoffFromLink();
+    // limpa o endereço, para ela não ver nada de estranho se olhar
+    history.replaceState(null, '', location.pathname);
+  }
   wireGame();
   syncRows(true);           // envia o que tiver ficado pendente da última vez
   current = nextPair();
@@ -715,18 +765,25 @@ function wireAdminButtons(rows, calc) {
   };
 
   $('ad-playoff').onclick = () => {
-    // congela os 6 já a partir dos Elos recalculados, para o round-robin fechar
     const top = RINGS.slice()
       .sort((a, b) => calc.ratings[b.id] - calc.ratings[a.id])
       .slice(0, PLAYOFF_TOP).map(r => r.id);
-    if (!confirm('Activar playoff entre:\n\n' + top.join(', ') + '\n\nSão ' +
-                 (PLAYOFF_TOP * (PLAYOFF_TOP - 1) / 2) + ' confrontos.')) return;
-    const s = load();
-    s.phase = 'playoff';
-    s.playoffIds = top;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-    alert('Playoff activado neste dispositivo.\n\nAtenção: a fase vive no localStorage do telemóvel onde ela joga — ' +
-          'para valer no jogo dela, é preciso activar no telemóvel dela.');
+    const jogos = RINGS.reduce((n, r) => n + (calc.games[r.id] || 0), 0) / 2;
+    const link = location.origin + location.pathname + '#/playoff';
+
+    if (jogos < 100 && !confirm(
+        'Só há ' + jogos + ' comparações. Abaixo de ~100 o top 6 ainda é ruído ' +
+        'e o playoff fecha o assunto cedo de mais.\n\nContinuar mesmo assim?')) return;
+
+    // A fase vive no dispositivo de quem joga: o playoff activa-se com o link,
+    // aberto no telemóvel dela. Este botão não altera nada aqui.
+    if (navigator.clipboard) navigator.clipboard.writeText(link).catch(() => {});
+    window.prompt(
+      'Top 6 neste momento:\n  ' + top.join(', ') + '\n' +
+      'São ' + (PLAYOFF_TOP * (PLAYOFF_TOP - 1) / 2) + ' confrontos.\n\n' +
+      'Manda-lhe este link (já copiado). O playoff arranca quando ela o abrir;\n' +
+      'os 6 são congelados nesse momento a partir da folha.',
+      link);
   };
 
   $('ad-reset').onclick = () => {
