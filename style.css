@@ -280,7 +280,7 @@ footer.site {
 #admin th, #admin td { border: 1px solid #bbb; padding: 3px 5px; text-align: left; white-space: nowrap; }
 #admin th { background: #eee; }
 #admin td.num { text-align: right; }
-#admin img.thumb { width: 34px; height: 34px; object-fit: cover; display: block; }
+#admin img.thumb { width: 56px; height: 56px; object-fit: cover; display: block; }
 #admin .weak { color: #a00; }
 #admin .warn { background: #ffe9e9; border: 1px solid #c00; padding: 6px 8px; margin-bottom: 10px; }
 #admin .ok { background: #eaffea; border: 1px solid #0a0; padding: 6px 8px; margin-bottom: 10px; }

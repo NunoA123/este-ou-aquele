@@ -17,13 +17,15 @@ const IMG_DIR = path.join(ROOT, 'aneis');
 const OUT = path.join(ROOT, 'rings.json');
 const FORCE = process.argv.includes('--force');
 
+// manter igual ao SCHEMA do app.js
 const SCHEMA = {
-  cut:     ['round', 'oval', 'princess', 'emerald', 'pear', 'marquise', 'cushion', 'radiant'],
-  setting: ['solitaire', 'halo', 'three-stone', 'pave', 'bezel', 'cluster'],
+  cut:     ['round', 'oval', 'princess', 'emerald', 'pear', 'marquise', 'cushion', 'radiant', 'baguette'],
+  setting: ['solitaire', 'halo', 'three-stone', 'five-stone', 'bezel', 'cluster', 'eternity', 'toi-et-moi'],
   metal:   ['white-gold', 'yellow-gold', 'rose-gold', 'platinum', 'mixed'],
   band:    ['thin', 'medium', 'thick'],
-  profile: ['low', 'medium', 'high'],
-  accent:  ['none', 'side-stones', 'engraved', 'twisted', 'split-shank']
+  accent:  ['none', 'pave-band', 'engraved', 'twisted', 'split-shank'],
+  stone:   ['colorless', 'green', 'sage', 'mint', 'teal', 'blue', 'pink', 'milky'],
+  size:    ['small', 'medium', 'large']
 };
 const FIELDS = Object.keys(SCHEMA);
 
@@ -34,7 +36,7 @@ if (!fs.existsSync(IMG_DIR)) {
 
 const files = fs.readdirSync(IMG_DIR)
   .filter(f => /\.(jpe?g|png|webp)$/i.test(f))
-  .sort();
+  .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));   // A2 antes de A10
 
 if (!files.length) {
   console.error('Nenhuma imagem em aneis/');

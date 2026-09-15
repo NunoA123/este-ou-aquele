@@ -10,8 +10,10 @@ index.html      a app toda (marcação)
 app.js          lógica: Elo, emparelhamento, sincronização, vista de admin
 style.css       estilo
 rings.json      atributos de cada anel  ← preenchido à mão
-aneis/          fotos r01.jpg … r33.jpg (1000×1000)
+aneis/          fotos A1.jpg … G57.jpg (800×800, recortes da mão dela)
+arquivo-v1/     os 33 anéis da primeira versão (fotos soltas) e o rings.json deles
 tools/
+  crop-hands.js recorta as fotos da mão para aneis/
   init-rings.js script que varre aneis/ e gera o stub do rings.json
   Code.gs       backend Google Apps Script
 ```
@@ -25,17 +27,38 @@ python3 -m http.server 8000
 
 ---
 
+## Versões
+
+**v2 (actual)**: 57 anéis, todos na mesma foto da mão dela, gerados com IA.
+Como a mão, o fundo e a luz são iguais em todas, a única coisa que muda entre
+dois cartões é o anel. As fotos originais estão em `../Ring Sample/`. O nome
+de cada ficheiro (`A1`, `D38`…) é o `id` do anel.
+
+**v1**: 33 fotos soltas da internet, em `arquivo-v1/`. As 177 escolhas desse
+período continuam na Google Sheet. O admin ignora-as porque os ids (`r01`…)
+já não existem, e o estado no telemóvel dela recomeça do zero porque a chave
+do `localStorage` passou a `ringduel:state:v2`.
+
+---
+
 ## Adicionar ou substituir imagens
 
-1. Pôr o ficheiro em `aneis/` com o nome `rNN.jpg` (dois dígitos, sequencial).
-2. Todas as imagens têm de ser **quadradas e do mesmo tamanho** (1000×1000) e
-   pesar menos de ~200KB. Para normalizar uma imagem nova, no macOS:
+1. Gerar a foto nova a partir da **mesma foto da mão** e pô-la em
+   `../Ring Sample/` com um nome novo (ex.: `G58.png`).
+2. Recortar:
 
    ```bash
-   sips --resampleHeightWidthMax 1000 nova.jpg --out aneis/r34.jpg
-   sips -c 1000 1000 aneis/r34.jpg
-   sips -s format jpeg -s formatOptions 72 aneis/r34.jpg --out aneis/r34.jpg
+   node tools/crop-hands.js "../Ring Sample"
    ```
+
+   Faz um quadrado de 820px com a mão e as quatro unhas, com o anel um pouco
+   abaixo e à esquerda do centro, e grava `aneis/G58.jpg` a 800×800. A ideia é
+   ela ver o anel como se olhasse para a própria mão. A foto inteira não
+   serve, porque num cartão de telemóvel o anel ficava com uns 20px. O centro
+   da pedra de cada foto está na tabela
+   `CENTROS` do script. Uma foto nova usa o centro por omissão: abrir o
+   recorte e, se o anel ficar descentrado, acrescentar a entrada e voltar a
+   correr.
 
 3. Correr o script para acrescentar a entrada ao `rings.json`:
 
@@ -62,18 +85,30 @@ aparece do lado dela.
 
 | Campo     | Valores |
 |-----------|---------|
-| `cut`     | `round` `oval` `princess` `emerald` `pear` `marquise` `cushion` `radiant` |
-| `setting` | `solitaire` `halo` `three-stone` `pave` `bezel` `cluster` |
+| `cut`     | `round` `oval` `princess` `emerald` `pear` `marquise` `cushion` `radiant` `baguette` (forma da pedra central) |
+| `setting` | `solitaire` `halo` `three-stone` `five-stone` `bezel` `cluster` `eternity` `toi-et-moi` |
 | `metal`   | `white-gold` `yellow-gold` `rose-gold` `platinum` `mixed` |
 | `band`    | `thin` `medium` `thick` |
-| `profile` | `low` `medium` `high` (altura a que a pedra assenta) |
-| `accent`  | `none` `side-stones` `engraved` `twisted` `split-shank` |
+| `accent`  | `none` `pave-band` `engraved` `twisted` `split-shank` (o que está no aro) |
+| `stone`   | `colorless` `green` `sage` `mint` `teal` `blue` `pink` `milky` (cor da pedra central) |
+| `size`    | `small` `medium` `large` (tamanho aparente da pedra central na foto) |
+
+Sobre os verdes, que são quase metade do conjunto:
+
+- `green` é o verde esmeralda saturado, claro ou escuro.
+- `sage` é o verde apagado, acinzentado ou oliva.
+- `mint` é o verde claro.
+- `teal` é o verde-azulado, a meio caminho entre `green` e `blue`.
+
+O `profile` (altura da pedra) saiu no v2. Nas fotos de cima não se vê, e um
+valor adivinhado estragava a agregação em vez de ajudar.
 
 Valores fora destas listas são aceites mas dão aviso na consola do browser e
 poluem a agregação. `node tools/init-rings.js` também os reporta.
 
-**As classificações actuais foram preenchidas a olho a partir das fotos.**
-Vale a pena passar os olhos e corrigir — a agregação por atributo é tão boa
+**As classificações foram preenchidas a olho a partir das fotos.** As que
+exigem mais juízo são `stone` (onde acaba `sage` e começa `green`) e `size`.
+Vale a pena passar os olhos e corrigir: a agregação por atributo é tão boa
 quanto esta tabela.
 
 ---
@@ -109,7 +144,9 @@ mantém-se — é essa que manda quando está configurada.
 
 O grupo do playoff fica **congelado** quando o activas, senão os Elos mexem-se a
 meio e o round-robin nunca fecha. Nenhum par se repete antes de a fase esgotar
-todas as combinações possíveis.
+todas as combinações possíveis. Os pares já vistos ficam guardados no
+`localStorage` e aguentam que ela feche e volte a abrir a app. No v1 viviam só
+em memória, e cada visita recomeçava o ciclo.
 
 ### Activar o playoff
 

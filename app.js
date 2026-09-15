@@ -10,7 +10,9 @@
 const SYNC_URL   = 'https://script.google.com/macros/s/AKfycbzIB3uKDWEd6TtZjd5gWCNHCMYnIdMu8JRF8i1gsy9I9zbBXpo9lJ46b2B2onJ6GCUzgg/exec';
 const ADMIN_PASS = 'mirtilo-quarenta-e-sete';
 
-const STORAGE_KEY    = 'ringduel:state:v1';
+// v2: fotos da mão dela (57 anéis). O v1 (33 fotos soltas) fica em arquivo-v1/.
+const STORAGE_KEY    = 'ringduel:state:v2';
+const STATE_VERSION  = 2;
 const SESSION_LIMIT  = 35;   // escolhas antes do ecrã de pausa
 const ELO_WINDOW     = 120;  // janela de emparelhamento na fase 2
 const PHASE1_GAMES   = 3;    // abaixo disto ainda estamos a cobrir
@@ -22,12 +24,13 @@ const SYNC_BATCH     = 5;
 
 /* ── Valores permitidos em rings.json ─────────────────────────── */
 const SCHEMA = {
-  cut:     ['round', 'oval', 'princess', 'emerald', 'pear', 'marquise', 'cushion', 'radiant'],
-  setting: ['solitaire', 'halo', 'three-stone', 'pave', 'bezel', 'cluster'],
+  cut:     ['round', 'oval', 'princess', 'emerald', 'pear', 'marquise', 'cushion', 'radiant', 'baguette'],
+  setting: ['solitaire', 'halo', 'three-stone', 'five-stone', 'bezel', 'cluster', 'eternity', 'toi-et-moi'],
   metal:   ['white-gold', 'yellow-gold', 'rose-gold', 'platinum', 'mixed'],
   band:    ['thin', 'medium', 'thick'],
-  profile: ['low', 'medium', 'high'],
-  accent:  ['none', 'side-stones', 'engraved', 'twisted', 'split-shank']
+  accent:  ['none', 'pave-band', 'engraved', 'twisted', 'split-shank'],
+  stone:   ['colorless', 'green', 'sage', 'mint', 'teal', 'blue', 'pink', 'milky'],
+  size:    ['small', 'medium', 'large']
 };
 const FIELDS = Object.keys(SCHEMA);
 
@@ -37,7 +40,7 @@ let RING_BY_ID = {};
 let state = null;
 let current = null;          // { a, b, leftIsA }
 let lastMove = null;         // uma escolha para trás
-let seenPairs = new Set();   // pares já mostrados no ciclo actual da fase
+let seenPairs = new Set();   // pares já mostrados no ciclo actual da fase (espelho de state.seen)
 let seenPhase = null;        // fase a que o ciclo pertence
 
 const $ = (id) => document.getElementById(id);
@@ -48,11 +51,12 @@ const $ = (id) => document.getElementById(id);
 
 function blankState() {
   const s = {
-    version: 1,
+    version: STATE_VERSION,
     player: 'k',
     ratings: {}, games: {}, wins: {},
     history: [],
     skipped: [],
+    seen: null,
     phase: 'pairing',
     playoffIds: null,
     sessionCount: 0
@@ -64,7 +68,7 @@ function blankState() {
 function load() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch (e) { s = null; }
-  if (!s || s.version !== 1) return blankState();
+  if (!s || s.version !== STATE_VERSION) return blankState();
   // anéis novos adicionados depois de a sessão começar
   RINGS.forEach(r => {
     if (typeof s.ratings[r.id] !== 'number') { s.ratings[r.id] = 1500; s.games[r.id] = 0; s.wins[r.id] = 0; }
@@ -74,7 +78,19 @@ function load() {
   s.sessionCount = s.sessionCount || 0;
   s.phase = s.phase || 'pairing';
   s.playoffIds = s.playoffIds || null;
+  s.seen = s.seen || null;
   return s;
+}
+
+/* Os pares já vistos vivem no state. Só em memória, cada vez que ela abria a
+   app o ciclo recomeçava e voltavam pares que ela já tinha respondido. */
+function restoreSeen() {
+  seenPairs = new Set((state.seen && state.seen.pairs) || []);
+  seenPhase = state.seen ? state.seen.phase : null;
+}
+
+function storeSeen() {
+  state.seen = { phase: seenPhase, pairs: Array.from(seenPairs) };
 }
 
 function save() {
@@ -210,6 +226,7 @@ function nextPair() {
   }
 
   seenPairs.add(chosen[2]);
+  storeSeen();   // vai para o localStorage no próximo save(), quando ela escolher
   return { a: chosen[0], b: chosen[1], leftIsA: Math.random() < 0.5 };
 }
 
@@ -356,12 +373,14 @@ function undo() {
       break;
     }
   }
-  seenPairs.delete(m.pairKey);
+  // o par que estava no ecrã não chegou a ser respondido: volta ao ciclo
+  if (current) seenPairs.delete(pairKey(current.a, current.b));
+  seenPairs.add(m.pairKey);
+  storeSeen();
   lastMove = null;
   save();
 
   current = { a: m.a, b: m.b, leftIsA: Math.random() < 0.5 };
-  seenPairs.add(m.pairKey);
   $('card0').classList.remove('chosen');
   $('card1').classList.remove('chosen');
   renderPair();
@@ -492,6 +511,7 @@ async function boot() {
   if (!RINGS.length) { console.error('rings.json está vazio'); return; }
 
   state = load();
+  restoreSeen();
   if (wantsPlayoff) {
     await activatePlayoffFromLink();
     // limpa o endereço, para ela não ver nada de estranho se olhar
@@ -567,10 +587,10 @@ function recompute(rows) {
   RINGS.forEach(r => { ratings[r.id] = 1500; games[r.id] = 0; wins[r.id] = 0; losses[r.id] = 0; });
 
   const h2h = {};   // h2h[a][b] = vitórias de a sobre b
-  let skips = 0, used = 0;
+  let skips = 0, used = 0, unknown = 0;
 
   rows.forEach(r => {
-    if (!(r.a in ratings) || !(r.b in ratings)) return;       // anel desconhecido
+    if (!(r.a in ratings) || !(r.b in ratings)) { unknown++; return; }  // anel desconhecido (ex.: v1)
     if (r.winner !== r.a && r.winner !== r.b) { skips++; return; }  // 'skip' e afins
     applyResult(ratings, games, wins, r.a, r.b, r.winner);
     const loser = r.winner === r.a ? r.b : r.a;
@@ -579,7 +599,7 @@ function recompute(rows) {
     used++;
   });
 
-  return { ratings, games, wins, losses, h2h, skips, used };
+  return { ratings, games, wins, losses, h2h, skips, used, unknown };
 }
 
 function aggregate(calc) {
@@ -659,6 +679,7 @@ function renderAdmin(rows, source) {
   html += '<h2>Estado</h2><table>' +
     row2('comparações contadas', calc.used) +
     row2('linhas ignoradas / saltadas', calc.skips + (source === 'local' ? ' (+' + (local.skipped || []).length + ' pares saltados localmente)' : '')) +
+    row2('linhas de anéis que já não existem (v1)', calc.unknown) +
     row2('anéis', RINGS.length) +
     row2('jogos por anel — mínimo', minG) +
     row2('jogos por anel — média', n(avgG, 2)) +
@@ -753,7 +774,7 @@ function wireAdminButtons(rows, calc) {
           const data = JSON.parse(fr.result);
           const st = data.local || data;
           if (!st.ratings) throw new Error('formato inesperado');
-          st.version = 1;
+          st.version = STATE_VERSION;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
           alert('Importado. A recarregar.');
           adminOpen = false; bootAdmin();
