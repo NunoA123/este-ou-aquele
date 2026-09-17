@@ -22,6 +22,11 @@ const K_SWITCH       = 5;
 const PLAYOFF_TOP    = 6;
 const SYNC_BATCH     = 5;
 
+/* "Nenhum dos dois" — ver applyNeither(). */
+const SKIP           = 'skip';   // o que vai na coluna winner da folha
+const NEITHER_BAR    = 1500;     // a fasquia: o anel médio
+const NEITHER_K      = 0.5;      // metade do K de um duelo normal
+
 /* ── Valores permitidos em rings.json ─────────────────────────── */
 const SCHEMA = {
   cut:     ['round', 'oval', 'princess', 'emerald', 'pear', 'marquise', 'cushion', 'radiant', 'baguette'],
@@ -53,15 +58,16 @@ function blankState() {
   const s = {
     version: STATE_VERSION,
     player: 'k',
-    ratings: {}, games: {}, wins: {},
+    ratings: {}, games: {}, wins: {}, neither: {},
     history: [],
     skipped: [],
+    skipsMigrated: true,
     seen: null,
     phase: 'pairing',
     playoffIds: null,
     sessionCount: 0
   };
-  RINGS.forEach(r => { s.ratings[r.id] = 1500; s.games[r.id] = 0; s.wins[r.id] = 0; });
+  RINGS.forEach(r => { s.ratings[r.id] = 1500; s.games[r.id] = 0; s.wins[r.id] = 0; s.neither[r.id] = 0; });
   return s;
 }
 
@@ -70,8 +76,10 @@ function load() {
   try { s = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch (e) { s = null; }
   if (!s || s.version !== STATE_VERSION) return blankState();
   // anéis novos adicionados depois de a sessão começar
+  s.neither = s.neither || {};
   RINGS.forEach(r => {
     if (typeof s.ratings[r.id] !== 'number') { s.ratings[r.id] = 1500; s.games[r.id] = 0; s.wins[r.id] = 0; }
+    if (typeof s.neither[r.id] !== 'number') s.neither[r.id] = 0;
   });
   s.history = s.history || [];
   s.skipped = s.skipped || [];
@@ -79,7 +87,36 @@ function load() {
   s.phase = s.phase || 'pairing';
   s.playoffIds = s.playoffIds || null;
   s.seen = s.seen || null;
+  s.skipsMigrated = s.skipsMigrated || false;
   return s;
+}
+
+/**
+ * Até esta versão, "Nenhum dos dois" não deixava rasto nenhum: sem Elo, sem
+ * linha na folha. Os pares que ela saltou até aqui estão no state.skipped e
+ * valem informação, por isso entram agora. Corre uma vez só.
+ *
+ * A data original perdeu-se — estas linhas vão para a folha com a data de
+ * hoje. A ordem entre elas não muda nada: o Elo de "nenhum dos dois" não
+ * depende do outro anel do par.
+ */
+function migrateSkips() {
+  if (state.skipsMigrated) return;
+  state.skipsMigrated = true;
+  let n = 0;
+  (state.skipped || []).forEach(p => {
+    const a = p[0], b = p[1];
+    if (typeof state.ratings[a] !== 'number' || typeof state.ratings[b] !== 'number') return;
+    applyNeither(state.ratings, state.games, state.neither, a, b);
+    state.history.push({
+      t: Date.now(), a, b, winner: SKIP,
+      ea: round2(state.ratings[a]), eb: round2(state.ratings[b]),
+      synced: false
+    });
+    n++;
+  });
+  save();
+  if (n) console.info(n + ' pares saltados antes desta versão foram contados agora.');
 }
 
 /* Os pares já vistos vivem no state. Só em memória, cada vez que ela abria a
@@ -116,6 +153,31 @@ function applyResult(ratings, games, wins, a, b, winner) {
   games[a] = (games[a] || 0) + 1;
   games[b] = (games[b] || 0) + 1;
   wins[winner] = (wins[winner] || 0) + 1;
+}
+
+/**
+ * "Nenhum dos dois": ela rejeitou os dois anéis do par.
+ *
+ * Diz alguma coisa sobre cada anel — está abaixo da fasquia — e nada sobre
+ * qual dos dois é melhor. Por isso nenhum ganha ao outro: cada um perde
+ * contra um adversário imaginário de 1500, o anel médio. Quem já está em
+ * baixo perde pouco, quem está no topo leva um corte a sério.
+ *
+ * Com meio K, custa metade de uma derrota normal. Uma rejeição vale menos do
+ * que uma derrota directa, porque não houve comparação entre os dois.
+ *
+ * Não conta como jogo: os jogos servem para saber se um anel já foi
+ * *comparado* o suficiente (fase 1) e para escolher o K. Vai num contador à
+ * parte, o neither.
+ */
+function applyNeither(ratings, games, neither, a, b) {
+  [a, b].forEach(id => {
+    const r = ratings[id];
+    if (typeof r !== 'number') return;
+    const k = kFor(games[id] || 0) * NEITHER_K;
+    ratings[id] = r + k * (0 - expected(r, NEITHER_BAR));
+    neither[id] = (neither[id] || 0) + 1;
+  });
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -311,16 +373,7 @@ function choose(winnerId) {
   const a = current.a, b = current.b;
   const loserId = winnerId === a ? b : a;
 
-  // snapshot para o "Anterior"
-  lastMove = {
-    a, b, winner: winnerId,
-    ra: state.ratings[a], rb: state.ratings[b],
-    ga: state.games[a], gb: state.games[b],
-    wa: state.wins[a], wb: state.wins[b],
-    session: state.sessionCount,
-    pairKey: pairKey(a, b)
-  };
-
+  snapshot(a, b, winnerId);
   applyResult(state.ratings, state.games, state.wins, a, b, winnerId);
   state.history.push({
     t: Date.now(), a, b, winner: winnerId,
@@ -335,26 +388,60 @@ function choose(winnerId) {
   const card = $('card0').dataset.ring === winnerId ? $('card0') : $('card1');
   card.classList.add('chosen');
 
-  setTimeout(() => {
-    if (state.sessionCount >= SESSION_LIMIT) {
-      $('card0').classList.remove('chosen');
-      $('card1').classList.remove('chosen');
-      syncRows(true);
-      showScreen('scr-pause');
-      busy = false;
-      return;
-    }
-    advance();
-  }, 260);
+  setTimeout(afterAnswer, 260);
   void loserId;
 }
 
+/** Snapshot para o "Anterior". Uma escolha ou um "nenhum dos dois". */
+function snapshot(a, b, winner) {
+  lastMove = {
+    a, b, winner,
+    ra: state.ratings[a], rb: state.ratings[b],
+    ga: state.games[a], gb: state.games[b],
+    wa: state.wins[a], wb: state.wins[b],
+    na: state.neither[a] || 0, nb: state.neither[b] || 0,
+    session: state.sessionCount,
+    pairKey: pairKey(a, b)
+  };
+}
+
+/** Pausa ao fim de SESSION_LIMIT respostas; senão, par seguinte. */
+function afterAnswer() {
+  if (state.sessionCount >= SESSION_LIMIT) {
+    // o advance() é que limpa isto no caso normal, e aqui não há advance()
+    $('card0').classList.remove('chosen');
+    $('card1').classList.remove('chosen');
+    syncRows(true);
+    showScreen('scr-pause');
+    busy = false;
+    return;
+  }
+  advance();
+}
+
+/**
+ * "Nenhum dos dois". Conta como resposta: baixa o Elo dos dois, vai para a
+ * folha com winner = "skip", e o par nunca mais aparece.
+ */
 function skipPair() {
   if (busy || !current) return;
   busy = true;
-  state.skipped.push([current.a, current.b]);
+
+  const a = current.a, b = current.b;
+  snapshot(a, b, SKIP);
+
+  state.skipped.push([a, b]);
+  applyNeither(state.ratings, state.games, state.neither, a, b);
+  state.history.push({
+    t: Date.now(), a, b, winner: SKIP,
+    ea: round2(state.ratings[a]), eb: round2(state.ratings[b]),
+    synced: false
+  });
+  state.sessionCount++;
   save();
-  advance();
+  syncRows(false);
+
+  afterAnswer();
 }
 
 function undo() {
@@ -363,7 +450,18 @@ function undo() {
   state.ratings[m.a] = m.ra; state.ratings[m.b] = m.rb;
   state.games[m.a]   = m.ga; state.games[m.b]   = m.gb;
   state.wins[m.a]    = m.wa; state.wins[m.b]    = m.wb;
+  state.neither[m.a] = m.na; state.neither[m.b] = m.nb;
   state.sessionCount = m.session;
+
+  // um "nenhum dos dois" desfeito devolve o par ao jogo
+  if (m.winner === SKIP) {
+    for (let i = state.skipped.length - 1; i >= 0; i--) {
+      if (pairKey(state.skipped[i][0], state.skipped[i][1]) === m.pairKey) {
+        state.skipped.splice(i, 1);
+        break;
+      }
+    }
+  }
 
   // remove do histórico apenas se ainda não foi enviado
   for (let i = state.history.length - 1; i >= 0; i--) {
@@ -512,6 +610,7 @@ async function boot() {
 
   state = load();
   restoreSeen();
+  migrateSkips();
   if (wantsPlayoff) {
     await activatePlayoffFromLink();
     // limpa o endereço, para ela não ver nada de estranho se olhar
@@ -583,15 +682,20 @@ function normalizeRemote(raw) {
 
 /** Recalcula tudo do zero a partir das linhas. */
 function recompute(rows) {
-  const ratings = {}, games = {}, wins = {}, losses = {};
-  RINGS.forEach(r => { ratings[r.id] = 1500; games[r.id] = 0; wins[r.id] = 0; losses[r.id] = 0; });
+  const ratings = {}, games = {}, wins = {}, losses = {}, neither = {};
+  RINGS.forEach(r => { ratings[r.id] = 1500; games[r.id] = 0; wins[r.id] = 0; losses[r.id] = 0; neither[r.id] = 0; });
 
   const h2h = {};   // h2h[a][b] = vitórias de a sobre b
   let skips = 0, used = 0, unknown = 0;
 
   rows.forEach(r => {
     if (!(r.a in ratings) || !(r.b in ratings)) { unknown++; return; }  // anel desconhecido (ex.: v1)
-    if (r.winner !== r.a && r.winner !== r.b) { skips++; return; }  // 'skip' e afins
+    // "nenhum dos dois": winner = 'skip'. Os dois descem, ninguém ganha.
+    if (r.winner !== r.a && r.winner !== r.b) {
+      applyNeither(ratings, games, neither, r.a, r.b);
+      skips++;
+      return;
+    }
     applyResult(ratings, games, wins, r.a, r.b, r.winner);
     const loser = r.winner === r.a ? r.b : r.a;
     losses[loser]++;
@@ -599,11 +703,13 @@ function recompute(rows) {
     used++;
   });
 
-  return { ratings, games, wins, losses, h2h, skips, used, unknown };
+  return { ratings, games, wins, losses, neither, h2h, skips, used, unknown };
 }
 
 function aggregate(calc) {
   const out = {};
+  // um "nenhum dos dois" também é uma resposta sobre o anel: pesa como um jogo
+  const respostas = (id) => (calc.games[id] || 0) + (calc.neither[id] || 0);
   FIELDS.forEach(f => {
     const buckets = {};
     RINGS.forEach(r => {
@@ -611,8 +717,8 @@ function aggregate(calc) {
       if (v === undefined || v === null || v === '') return;
       const bk = buckets[v] || (buckets[v] = { value: v, rings: 0, games: 0, wsum: 0 });
       bk.rings++;
-      bk.games += calc.games[r.id] || 0;
-      bk.wsum  += (calc.ratings[r.id] || 1500) * (calc.games[r.id] || 0);
+      bk.games += respostas(r.id);
+      bk.wsum  += (calc.ratings[r.id] || 1500) * respostas(r.id);
       bk.plain = (bk.plain || 0) + (calc.ratings[r.id] || 1500);
     });
     out[f] = Object.values(buckets).map(bk => ({
@@ -678,7 +784,7 @@ function renderAdmin(rows, source) {
   /* 4. Estado */
   html += '<h2>Estado</h2><table>' +
     row2('comparações contadas', calc.used) +
-    row2('linhas ignoradas / saltadas', calc.skips + (source === 'local' ? ' (+' + (local.skipped || []).length + ' pares saltados localmente)' : '')) +
+    row2('"nenhum dos dois" contados', calc.skips) +
     row2('linhas de anéis que já não existem (v1)', calc.unknown) +
     row2('anéis', RINGS.length) +
     row2('jogos por anel — mínimo', minG) +
@@ -697,7 +803,7 @@ function renderAdmin(rows, source) {
 
   /* 2. Agregação por atributo — a secção mais importante */
   html += '<h2>Agregação por atributo</h2>';
-  html += '<p class="muted">Elo médio ponderado pelos jogos disputados. ' +
+  html += '<p class="muted">Elo médio ponderado pelas respostas (duelos + "nenhum dos dois"). ' +
           '<span class="weak">A vermelho</span> = menos de 3 anéis ou menos de 10 jogos: pouco fiável.</p>';
   html += '<div class="grid">';
   FIELDS.forEach(f => {
@@ -724,7 +830,7 @@ function renderAdmin(rows, source) {
 
   /* 1. Tabela de anéis */
   html += '<h2>Anéis por Elo</h2><div class="scroll"><table><thead><tr>' +
-    '<th>#</th><th>foto</th><th>id</th><th class="num">elo</th><th class="num">jogos</th><th class="num">v-d</th>' +
+    '<th>#</th><th>foto</th><th>id</th><th class="num">elo</th><th class="num">jogos</th><th class="num">v-d</th><th class="num">nenhum</th>' +
     FIELDS.map(f => '<th>' + f + '</th>').join('') + '<th>note</th></tr></thead><tbody>';
   ordered.forEach((r, i) => {
     html += '<tr><td class="num">' + (i + 1) + '</td>' +
@@ -733,6 +839,7 @@ function renderAdmin(rows, source) {
       '<td class="num">' + n(calc.ratings[r.id]) + '</td>' +
       '<td class="num">' + (calc.games[r.id] || 0) + '</td>' +
       '<td class="num">' + (calc.wins[r.id] || 0) + '-' + (calc.losses[r.id] || 0) + '</td>' +
+      '<td class="num">' + (calc.neither[r.id] || 0) + '</td>' +
       FIELDS.map(f => '<td>' + (r[f] || '<span class="weak">—</span>') + '</td>').join('') +
       '<td>' + (r.note || '') + '</td></tr>';
   });

@@ -120,14 +120,17 @@ quanto esta tabela.
 
 Mostra, por ordem de importância:
 
-1. **Agregação por atributo** — Elo médio ponderado pelos jogos, por cada valor
-   de cada campo. A vermelho ficam os valores com menos de 3 anéis ou menos de
-   10 jogos: pouco fiáveis, não tirar conclusões daí.
+1. **Agregação por atributo** — Elo médio ponderado pelas respostas (duelos
+   mais "nenhum dos dois"), por cada valor de cada campo. A vermelho ficam os
+   valores com menos de 3 anéis ou menos de 10 respostas: pouco fiáveis, não
+   tirar conclusões daí.
 2. **Intransitividade no top 6** — ciclos A vence B, B vence C, C vence A. Um
    ciclo significa que naquele grupo não há preferência forte. É informação,
    não é um erro.
-3. **Estado** — total de comparações, jogos por anel, pares saltados, fase.
-4. **Tabela de anéis** por Elo, com todos os atributos.
+3. **Estado** — total de comparações, quantos "nenhum dos dois", jogos por
+   anel, fase.
+4. **Tabela de anéis** por Elo, com a coluna `nenhum` (quantas vezes o anel
+   apanhou um "nenhum dos dois") e todos os atributos.
 
 Botões: `Exportar JSON`, `Importar JSON`, `Ativar playoff`, `Reset total`.
 
@@ -172,6 +175,38 @@ Não vale a pena antes de umas 100 comparações — abaixo disso o top 6 ainda 
 ruído e estarias a fechar o assunto com os anéis errados. O admin avisa-te.
 
 K = 32 abaixo de 5 jogos, 16 daí para cima.
+
+---
+
+## "Nenhum dos dois"
+
+Ela rejeitou os dois anéis do par. Isso diz que cada um deles está abaixo da
+fasquia dela, e não diz nada sobre qual dos dois é melhor.
+
+Por isso nenhum ganha ao outro: **cada um perde contra um adversário
+imaginário de 1500**, o anel médio. Quem já estava em baixo perde pouco, quem
+estava no topo leva um corte a sério. Vale **metade** de uma derrota normal
+(meio K) — foi uma rejeição, não uma comparação entre os dois.
+
+- **Não conta como jogo.** Os jogos medem quantas vezes um anel foi
+  *comparado*, e são isso que a fase 1 usa para garantir cobertura e o K usa
+  para decidir se ainda está a assentar. As rejeições vão num contador à
+  parte, o `neither`, que aparece na coluna `nenhum` do admin.
+- **Conta como resposta** para o ecrã de pausa e pesa como um jogo na
+  agregação por atributo.
+- **Vai para a folha**, com `winner = "skip"`. O `Code.gs` não precisa de
+  alterações; o admin recalcula a partir dessas linhas e chega exactamente ao
+  mesmo que o telemóvel dela.
+- **O par não volta a aparecer**, em fase nenhuma.
+- **O `Anterior` desfaz**, incluindo devolver o par ao jogo — desde que a
+  linha ainda não tenha ido para a folha. Se já foi, fica lá (é o mesmo que já
+  acontecia com as escolhas normais).
+
+Até Setembro de 2026 isto não acontecia: um "nenhum dos dois" não mexia no
+Elo nem deixava linha nenhuma. Os pares que ela tinha saltado até aí estavam
+guardados no telemóvel e entraram todos de uma vez, na primeira vez que abriu
+a versão nova (`migrateSkips`, corre uma vez só). Foram para a folha com a
+data desse dia, porque a data original perdeu-se.
 
 ---
 
@@ -220,11 +255,12 @@ inverso, para o `localStorage` deste dispositivo.
 ## Do lado dela
 
 Duas fotos e mais nada. Sem pontuações, sem nomes, sem marcas, sem preços, sem
-barras de progresso. `Nenhum dos dois` salta o par para sempre e não conta como
-jogo. `Anterior` desfaz a última escolha (uma só). No computador: `←` `→`
-escolhem, `↓` salta, `backspace` desfaz.
+barras de progresso. `Nenhum dos dois` baixa o Elo dos dois anéis e tira o par
+do jogo (ver acima). `Anterior` desfaz a última resposta, seja escolha ou
+rejeição (uma só). No computador: `←` `→` escolhem, `↓` é o nenhum dos dois,
+`backspace` desfaz.
 
-Ao fim de 35 escolhas aparece o ecrã de pausa. Não é enfeite: a partir daí a
+Ao fim de 35 respostas aparece o ecrã de pausa. Não é enfeite: a partir daí a
 qualidade das respostas cai e os dados ficam piores.
 
 Os dois cartões da arena são pixel-a-pixel idênticos e o lado de cada anel é
