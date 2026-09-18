@@ -141,9 +141,27 @@ mantém-se — é essa que manda quando está configurada.
 
 | Fase | Quando | O que faz |
 |---|---|---|
-| 1 | algum anel com menos de 3 jogos | aleatório, prioridade a quem tem menos jogos — garante cobertura |
-| 2 | todos com 3+ jogos | só pares dentro de ±120 pontos de Elo — é aqui que está a informação |
+| 1 | algum anel com menos de 3 aparições | aleatório, prioridade a quem apareceu menos — garante cobertura |
+| 2 | todos com 3+ aparições | só a metade de cima da tabela, e só pares dentro de ±120 pontos de Elo |
 | playoff | manual, ver abaixo | round-robin dos 6 primeiros, 15 confrontos, depois acaba |
+
+**Aparições, não duelos.** Uma rejeição ("nenhum dos dois") conta para a
+cobertura. Enquanto contavam só duelos, um anel rejeitado ficava com o
+contador parado e a fase 1 voltava a pô-lo à frente da fila: o C17 apareceu 15
+vezes, 11 delas para ser rejeitado, enquanto anéis do meio da tabela apareciam
+3. O terço de baixo estava a levar 6,9 aparições por anel contra 4,6 do terço
+de cima.
+
+**A fase 2 joga-se só na metade de cima** (`focusIds`). Depois da cobertura,
+ordenar os anéis que ela não quer não serve para nada — o que interessa é
+saber qual é o primeiro. Sem o corte, a janela de ±120 punha o fundo da tabela
+a jogar contra o fundo da tabela e ela lá ia rejeitar os dois outra vez.
+
+O corte é por posição e é refeito a cada par: um anel que caia sai do sorteio,
+mas se os de dentro forem perdendo pontos e passarem para trás dele, volta a
+entrar. Um azar nos primeiros duelos não o elimina de vez. Dentro da janela, a
+prioridade vai para os anéis que ela viu menos vezes, para o topo se ordenar
+depressa em vez de repetir sempre os mesmos.
 
 O grupo do playoff fica **congelado** quando o activas, senão os Elos mexem-se a
 meio e o round-robin nunca fecha. Nenhum par se repete antes de a fase esgotar

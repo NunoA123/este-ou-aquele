@@ -192,10 +192,19 @@ function skippedSet() {
   return s;
 }
 
-/** Fase corrente: 'playoff' é manual; senão depende do mínimo de jogos. */
+/**
+ * Quantas vezes o anel apareceu: duelos mais rejeições.
+ *
+ * É isto que mede se ela já viu o anel, e não os duelos. Só com duelos, um
+ * anel rejeitado ficava com o contador parado e a fase 1 punha-o outra vez à
+ * frente da fila — o C17 chegou a aparecer 15 vezes, 11 delas rejeitado.
+ */
+const shown = (id) => (state.games[id] || 0) + ((state.neither && state.neither[id]) || 0);
+
+/** Fase corrente: 'playoff' é manual; senão depende da cobertura. */
 function currentPhase() {
   if (state.phase === 'playoff' || state.phase === 'finished') return state.phase;
-  const min = Math.min(...RINGS.map(r => state.games[r.id] || 0));
+  const min = Math.min(...RINGS.map(r => shown(r.id)));
   return min < PHASE1_GAMES ? 'phase1' : 'phase2';
 }
 
@@ -219,22 +228,31 @@ function playoffIds() {
   return state.playoffIds;
 }
 
+/**
+ * A metade de cima da tabela — os anéis que a fase 2 disputa.
+ *
+ * Depois da cobertura, ordenar os anéis que ela não quer não serve para nada:
+ * o que interessa é saber qual é o primeiro. Sem este corte, a janela de ±120
+ * punha o fundo da tabela a jogar contra o fundo da tabela, e ela lá ia
+ * rejeitar os dois outra vez.
+ *
+ * O corte é por posição e é refeito a cada par: um anel que caia sai do
+ * sorteio, mas se os de dentro forem perdendo pontos e passarem para trás
+ * dele, volta a entrar. Um azar nos primeiros duelos não é definitivo.
+ */
+function focusIds() {
+  return topIds(Math.ceil(RINGS.length / 2));
+}
+
 /** Todos os pares possíveis da fase, já sem os saltados. */
 function candidatePairs(phase) {
   const skip = skippedSet();
   const out = [];
 
-  if (phase === 'playoff') {
-    const top = playoffIds();
-    for (let i = 0; i < top.length; i++)
-      for (let j = i + 1; j < top.length; j++) {
-        const k = pairKey(top[i], top[j]);
-        if (!skip.has(k)) out.push([top[i], top[j], k]);
-      }
-    return out;
-  }
+  const ids = phase === 'playoff' ? playoffIds()
+            : phase === 'phase2'  ? focusIds()
+            : RINGS.map(r => r.id);
 
-  const ids = RINGS.map(r => r.id);
   for (let i = 0; i < ids.length; i++)
     for (let j = i + 1; j < ids.length; j++) {
       const k = pairKey(ids[i], ids[j]);
@@ -267,12 +285,16 @@ function nextPair() {
 
   let chosen;
 
-  if (phase === 'phase1') {
-    // prioridade a quem tem menos jogos disputados
-    const g = (id) => state.games[id] || 0;
+  /** Dos pares em cima da mesa, os que ela viu menos vezes. */
+  const leastShown = (pool) => {
     let best = Infinity;
-    fresh.forEach(p => { const v = g(p[0]) + g(p[1]); if (v < best) best = v; });
-    const tier = fresh.filter(p => g(p[0]) + g(p[1]) === best);
+    pool.forEach(p => { const v = shown(p[0]) + shown(p[1]); if (v < best) best = v; });
+    return pool.filter(p => shown(p[0]) + shown(p[1]) === best);
+  };
+
+  if (phase === 'phase1') {
+    // prioridade a quem apareceu menos vezes — garante cobertura
+    const tier = leastShown(fresh);
     chosen = tier[(Math.random() * tier.length) | 0];
 
   } else if (phase === 'phase2') {
@@ -281,7 +303,10 @@ function nextPair() {
     let tier = near(ELO_WINDOW);
     for (let w = ELO_WINDOW * 2; !tier.length && w <= 2000; w *= 2) tier = near(w);
     if (!tier.length) tier = fresh;
-    chosen = tier[(Math.random() * tier.length) | 0];
+    // dentro da janela, espalhar pelos que ela viu menos: o topo ordena-se
+    // mais depressa do que a sortear à toa entre os mesmos de sempre
+    const menos = leastShown(tier);
+    chosen = menos[(Math.random() * menos.length) | 0];
 
   } else { // playoff — ordem aleatória entre as combinações que faltam
     chosen = fresh[(Math.random() * fresh.length) | 0];
@@ -760,7 +785,9 @@ function renderAdmin(rows, source) {
   const n = (x, d = 1) => (Math.round(x * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 
   const ordered = RINGS.slice().sort((a, b) => calc.ratings[b.id] - calc.ratings[a.id]);
-  const gamesArr = RINGS.map(r => calc.games[r.id] || 0);
+  const focoN = Math.ceil(RINGS.length / 2);
+  const foco = new Set(ordered.slice(0, focoN).map(r => r.id));
+  const gamesArr = RINGS.map(r => (calc.games[r.id] || 0) + (calc.neither[r.id] || 0));
   const minG = Math.min(...gamesArr), avgG = gamesArr.reduce((a, b) => a + b, 0) / (gamesArr.length || 1);
 
   const local = load();
@@ -768,7 +795,9 @@ function renderAdmin(rows, source) {
     const saved = state ? state.phase : local.phase;
     if (saved === 'playoff') return 'playoff';
     if (saved === 'finished') return 'terminado';
-    return minG < PHASE1_GAMES ? 'fase 1 (cobertura)' : 'fase 2 (janela ±' + ELO_WINDOW + ')';
+    return minG < PHASE1_GAMES
+      ? 'fase 1 (cobertura)'
+      : 'fase 2 (janela ±' + ELO_WINDOW + ', só entre os ' + focoN + ' primeiros)';
   })();
 
   const agg = aggregate(calc);
@@ -787,8 +816,8 @@ function renderAdmin(rows, source) {
     row2('"nenhum dos dois" contados', calc.skips) +
     row2('linhas de anéis que já não existem (v1)', calc.unknown) +
     row2('anéis', RINGS.length) +
-    row2('jogos por anel — mínimo', minG) +
-    row2('jogos por anel — média', n(avgG, 2)) +
+    row2('aparições por anel — mínimo', minG) +
+    row2('aparições por anel — média', n(avgG, 2)) +
     row2('fase actual', phase) +
     '</table>';
 
@@ -830,12 +859,13 @@ function renderAdmin(rows, source) {
 
   /* 1. Tabela de anéis */
   html += '<h2>Anéis por Elo</h2><div class="scroll"><table><thead><tr>' +
-    '<th>#</th><th>foto</th><th>id</th><th class="num">elo</th><th class="num">jogos</th><th class="num">v-d</th><th class="num">nenhum</th>' +
+    '<th>#</th><th>foto</th><th>id</th><th>foco</th><th class="num">elo</th><th class="num">jogos</th><th class="num">v-d</th><th class="num">nenhum</th>' +
     FIELDS.map(f => '<th>' + f + '</th>').join('') + '<th>note</th></tr></thead><tbody>';
   ordered.forEach((r, i) => {
     html += '<tr><td class="num">' + (i + 1) + '</td>' +
       '<td><img class="thumb" src="' + r.img + '" alt=""></td>' +
       '<td>' + r.id + '</td>' +
+      '<td>' + (foco.has(r.id) ? '●' : '<span class="weak">fora</span>') + '</td>' +
       '<td class="num">' + n(calc.ratings[r.id]) + '</td>' +
       '<td class="num">' + (calc.games[r.id] || 0) + '</td>' +
       '<td class="num">' + (calc.wins[r.id] || 0) + '-' + (calc.losses[r.id] || 0) + '</td>' +
