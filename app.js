@@ -16,8 +16,8 @@ const ADMIN_PASS = 'mirtilo-quarenta-e-sete';
    feitio da pedra central. As rondas anteriores ficam em arquivo-v1/ e
    arquivo-v2/, e os ids (R01…R26) não chocam com os delas, por isso as linhas
    antigas continuam na folha sem se misturarem. */
-const STORAGE_KEY    = 'ringduel:state:v4';
-const STATE_VERSION  = 4;
+const STORAGE_KEY    = 'ringduel:state:v5';
+const STATE_VERSION  = 5;
 const SESSION_LIMIT  = 35;   // escolhas antes do ecrã de pausa
 const ELO_WINDOW     = 120;  // janela de emparelhamento na fase 2
 const PHASE1_GAMES   = 3;    // abaixo disto ainda estamos a cobrir
@@ -57,7 +57,7 @@ const FIELDS = Object.keys(SCHEMA);   // o rings.json traz ainda "medida" e "not
  *
  *  1. Recentrado. O Elo é relativo ao grupo onde foi ganho, e os 14 repescados
  *     não são uma amostra ao calhas da ronda 1: são quase todos do topo, e a
- *     média deles era 1544 contra 1500 do conjunto. Importado em cru, os 19
+ *     média deles era 1540 contra 1500 do conjunto. Importado em cru, os 19
  *     anéis novos começavam 44 pontos atrás sem terem respondido a nada.
  *  2. Encolhido a metade. Cada um destes números saiu de 4 a 10 duelos contra
  *     um grupo de anéis que já não existe. O que se aproveita é a ordem entre

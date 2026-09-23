@@ -12,7 +12,7 @@
     "tone": "none",
     "vividness": "none",
     "size": "medium",
-    "seed": 1512,
+    "seed": 1514,
     "note": "repescado da ronda 1 (era A1, 7.º): a referência incolor"
   },
   {
@@ -28,7 +28,7 @@
     "tone": "dark",
     "vividness": "vivid",
     "size": "small",
-    "seed": 1522,
+    "seed": 1525,
     "note": "repescado da ronda 1 (era D25, 2.º) · cor medida 131°/0.25/0.29"
   },
   {
@@ -44,7 +44,7 @@
     "tone": "dark",
     "vividness": "muted",
     "size": "medium",
-    "seed": 1522,
+    "seed": 1524,
     "note": "repescado da ronda 1 (era D26, 13.º) · cor medida 125°/0.14/0.25"
   },
   {
@@ -60,7 +60,7 @@
     "tone": "dark",
     "vividness": "vivid",
     "size": "medium",
-    "seed": 1522,
+    "seed": 1524,
     "note": "repescado da ronda 1 (era D27, 14.º) · cor medida 188°/0.28/0.27"
   },
   {
@@ -76,7 +76,7 @@
     "tone": "medium",
     "vividness": "vivid",
     "size": "medium",
-    "seed": 1527,
+    "seed": 1529,
     "note": "repescado da ronda 1 (era F50, 4.º) · cor medida 120°/0.21/0.34"
   },
   {
@@ -92,7 +92,7 @@
     "tone": "light",
     "vividness": "muted",
     "size": "small",
-    "seed": 1532,
+    "seed": 1534,
     "note": "repescado da ronda 1 (era G56, 1.º) · cor medida 63°/0.16/0.48"
   },
   {
@@ -393,7 +393,7 @@
     "tone": "none",
     "vividness": "none",
     "size": "small",
-    "seed": 1508,
+    "seed": 1510,
     "note": "repescado (era D18, 7.º na ronda 1): o solitário mais básico de todos; par com o R01 para isolar o tamanho"
   },
   {
@@ -409,7 +409,7 @@
     "tone": "dark",
     "vividness": "vivid",
     "size": "medium",
-    "seed": 1505,
+    "seed": 1507,
     "note": "repescado (era D21, 8.º): oval verde sem laterais; par com o R03, R08 e R22 · cor medida 150°/0.25/0.26"
   },
   {
@@ -425,7 +425,7 @@
     "tone": "dark",
     "vividness": "vivid",
     "size": "medium",
-    "seed": 1490,
+    "seed": 1492,
     "note": "repescado (era D20, 14.º): redondo verde sem laterais; par com o R02 e o R21 · cor medida 136°/0.25/0.24"
   },
   {
@@ -441,7 +441,7 @@
     "tone": "medium",
     "vividness": "vivid",
     "size": "medium",
-    "seed": 1482,
+    "seed": 1484,
     "note": "repescado (era D22, 21.º): redondo teal sem laterais; par com o R04 e o R25 · cor medida 178°/0.25/0.30"
   },
   {
@@ -457,7 +457,7 @@
     "tone": "none",
     "vividness": "none",
     "size": "small",
-    "seed": 1500,
+    "seed": 1502,
     "note": "repescado (era E42, 11.º): cinco diamantes graduados, sem pedra central — o melhor dos \"sem pedra\""
   },
   {
@@ -473,7 +473,7 @@
     "tone": "none",
     "vividness": "none",
     "size": "small",
-    "seed": 1483,
+    "seed": 1485,
     "note": "repescado (era E40, 20.º): meia-aliança de diamantes, sem pedra central"
   },
   {
@@ -489,7 +489,7 @@
     "tone": "medium",
     "vividness": "vivid",
     "size": "small",
-    "seed": 1479,
+    "seed": 1481,
     "note": "repescado (era E41, 26.º): meia-aliança verde; par com o R32 para isolar a cor numa aliança · cor medida 137°/0.28/0.39"
   },
   {
@@ -505,7 +505,103 @@
     "tone": "dark",
     "vividness": "vivid",
     "size": "large",
-    "seed": 1417,
+    "seed": 1419,
     "note": "repescado (era C17, 57.º e último, com 11 rejeições): controlo — se ela voltar a rejeitá-lo, a ronda 2 está a medir o mesmo que a ronda 1; par com o R17, que é um halo pequeno e claro"
+  },
+  {
+    "id": "R35",
+    "img": "aneis/R35.jpg",
+    "cut": "round",
+    "setting": "three-stone",
+    "side": "trillion",
+    "metal": "yellow-gold",
+    "band": "thin",
+    "accent": "none",
+    "stone": "colorless",
+    "tone": "none",
+    "vividness": "none",
+    "size": "small",
+    "seed": 1495,
+    "note": "repescado (era D30, 13.º): três pedras em incolor — separa \"gosta de três pedras\" de \"gosta de verde\"; par com o R02 e o R25"
+  },
+  {
+    "id": "R36",
+    "img": "aneis/R36.jpg",
+    "cut": "oval",
+    "setting": "three-stone",
+    "side": "round",
+    "metal": "yellow-gold",
+    "band": "thin",
+    "accent": "none",
+    "stone": "blue",
+    "tone": "medium",
+    "vividness": "vivid",
+    "size": "medium",
+    "seed": 1496,
+    "note": "repescado (era D29, 12.º): o único azul do conjunto, e nunca tinha enfrentado nenhum dos favoritos · cor medida 223°/0.46/0.34"
+  },
+  {
+    "id": "R37",
+    "img": "aneis/R37.jpg",
+    "cut": "round",
+    "setting": "cluster",
+    "side": "marquise",
+    "metal": "yellow-gold",
+    "band": "thin",
+    "accent": "engraved",
+    "stone": "green",
+    "tone": "medium",
+    "vividness": "muted",
+    "size": "medium",
+    "seed": 1483,
+    "note": "repescado (era G57, 23.º): o único com o aro trabalhado (milgrain) — dos 33 anteriores, 29 tinham o aro liso · cor medida 81°/0.13/0.37"
+  },
+  {
+    "id": "R38",
+    "img": "aneis/R38.jpg",
+    "cut": "oval",
+    "setting": "solitaire",
+    "side": "none",
+    "metal": "yellow-gold",
+    "band": "thin",
+    "accent": "none",
+    "stone": "colorless",
+    "tone": "none",
+    "vividness": "none",
+    "size": "medium",
+    "seed": 1503,
+    "note": "repescado (era D19, 10.º): diamante contra verde no mesmo oval; par com o R28"
+  },
+  {
+    "id": "R39",
+    "img": "aneis/R39.jpg",
+    "cut": "oval",
+    "setting": "three-stone",
+    "side": "round",
+    "metal": "yellow-gold",
+    "band": "thin",
+    "accent": "none",
+    "stone": "teal",
+    "tone": "medium",
+    "vividness": "vivid",
+    "size": "medium",
+    "seed": 1503,
+    "note": "repescado (era D28, 9.º): o melhor classificado que tinha ficado de fora; par com o R03 e o R05 · cor medida 193°/0.23/0.30"
+  },
+  {
+    "id": "R40",
+    "img": "aneis/R40.jpg",
+    "cut": "cushion",
+    "setting": "solitaire",
+    "side": "none",
+    "metal": "yellow-gold",
+    "band": "thin",
+    "accent": "none",
+    "stone": "green",
+    "tone": "medium",
+    "vividness": "muted",
+    "size": "medium",
+    "seed": 1490,
+    "note": "repescado (era F48, 16.º): cushion clara em solitário; ficou em 16.º sem nunca ter enfrentado um favorito · cor medida 94°/0.14/0.44"
   }
 ]

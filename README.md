@@ -30,7 +30,7 @@ python3 -m http.server 8000
 
 ## Versões
 
-**v3 (actual, ronda 2)**: 33 anéis, afinados com o que a ronda 1 ensinou.
+**v3 (actual, ronda 2)**: 39 anéis, afinados com o que a ronda 1 ensinou.
 Tudo o que ela já tinha decidido está fixo — ouro amarelo, aro fino, pedra
 pequena ou média, garras em vez de bezel ou halo — e o que varia é o que a
 ronda 1 não conseguiu separar: o tom do verde, a forma das pedras laterais e o
@@ -68,6 +68,31 @@ nunca foi testada uma aliança lisa contra os favoritos dela.
 
 As posições servem também de calibração: estão espalhadas do 7.º ao último, por
 isso dá para ver se a ordem se repete ou se ela mudou de ideias.
+
+E uma terceira leva (`R35`–`R40`), desta vez escolhida por um critério
+diferente: anéis que ficaram bem classificados na ronda 1 **sem nunca terem
+enfrentado os favoritos**. A pontuação deles assentava em duelos contra o meio
+da tabela, por isso valia pouco.
+
+| Novo | Era | Posição | Porquê |
+|---|---|---|---|
+| R35 | D30 | 13.º | três pedras em incolor: separa "gosta de três pedras" de "gosta de verde", que na ronda 2 andavam sempre juntos |
+| R36 | D29 | 12.º | o único azul; **nunca tinha enfrentado nenhum** dos oito favoritos |
+| R37 | G57 | 23.º | o único com o aro trabalhado (milgrain); dos 33 anteriores, 29 tinham o aro liso |
+| R38 | D19 | 10.º | diamante contra verde no mesmo oval; par com o R28 |
+| R39 | D28 | 9.º | o melhor classificado que tinha ficado de fora |
+| R40 | F48 | 16.º | cushion clara em solitário; 16.º sem nunca ter enfrentado um favorito |
+
+Com isto o incolor passa de 4 para 6 anéis e deixa de ser uma nota de rodapé:
+no modelo da ronda 1, incolor e verde eram indistinguíveis, e essa é a pergunta
+mais cara de todas.
+
+**O que a repescagem não resolve: o metal.** O conjunto é 100% ouro amarelo. A
+ronda 1 dizia que o ouro branco perdia 31–1, mas os 8 anéis em ouro branco
+tinham todos outra característica perdedora — três bezel, um halo, dois
+lapidação esmeralda, um azul, um menta. Importar um deles repetia o erro em vez
+de o corrigir. Para fechar o metal era preciso gerar duas versões em ouro
+branco de anéis que ela já mostrou gostar.
 
 **v2 (ronda 1)**: 57 anéis, todos na mesma foto da mão dela, gerados com IA.
 Como a mão, o fundo e a luz são iguais em todas, a única coisa que muda entre
