@@ -10,8 +10,9 @@ index.html      a app toda (marcação)
 app.js          lógica: Elo, emparelhamento, sincronização, vista de admin
 style.css       estilo
 rings.json      atributos de cada anel  ← preenchido à mão
-aneis/          fotos A1.jpg … G57.jpg (800×800, recortes da mão dela)
+aneis/          fotos R01.jpg … R26.jpg (800×800, recortes da mão dela)
 arquivo-v1/     os 33 anéis da primeira versão (fotos soltas) e o rings.json deles
+arquivo-v2/     os 57 anéis da ronda 1 e o rings.json deles
 tools/
   crop-hands.js recorta as fotos da mão para aneis/
   init-rings.js script que varre aneis/ e gera o stub do rings.json
@@ -29,36 +30,56 @@ python3 -m http.server 8000
 
 ## Versões
 
-**v2 (actual)**: 57 anéis, todos na mesma foto da mão dela, gerados com IA.
+**v3 (actual, ronda 2)**: 25 anéis, afinados com o que a ronda 1 ensinou.
+Tudo o que ela já tinha decidido está fixo — ouro amarelo, aro fino, pedra
+pequena ou média, garras em vez de bezel ou halo — e o que varia é o que a
+ronda 1 não conseguiu separar: o tom do verde, a forma das pedras laterais e o
+feitio da pedra central. Fotos originais em `../Aneis Round 2/`.
+
+Seis anéis vieram da ronda 1 por terem ficado no topo (o 1.º, o 2.º, o 4.º, o
+7.º, o 13.º e o 14.º) e servem de âncora entre as duas rondas. **Foram
+renomeados** para `R01`–`R06`: com o id antigo, o admin apanhava as linhas que
+esses anéis já tinham na folha, de duelos contra 50 anéis que já não existem.
+O `MAPA` no `tools/crop-hands.js` guarda a correspondência.
+
+**v2 (ronda 1)**: 57 anéis, todos na mesma foto da mão dela, gerados com IA.
 Como a mão, o fundo e a luz são iguais em todas, a única coisa que muda entre
 dois cartões é o anel. As fotos originais estão em `../Ring Sample/`. O nome
 de cada ficheiro (`A1`, `D38`…) é o `id` do anel.
 
+O que ela respondeu na ronda 1 (125 duelos e 35 rejeições) fica em
+`arquivo-v2/` e na folha.
+
 **v1**: 33 fotos soltas da internet, em `arquivo-v1/`. As 177 escolhas desse
-período continuam na Google Sheet. O admin ignora-as porque os ids (`r01`…)
-já não existem, e o estado no telemóvel dela recomeça do zero porque a chave
-do `localStorage` passou a `ringduel:state:v2`.
+período continuam na Google Sheet.
+
+Cada ronda tem a sua chave de `localStorage` (`ringduel:state:v3` agora), por
+isso o telemóvel dela recomeça do zero, e as linhas das rondas anteriores
+continuam na folha sem se misturarem: o admin ignora ids que já não existem e
+conta-os à parte.
 
 ---
 
 ## Adicionar ou substituir imagens
 
 1. Gerar a foto nova a partir da **mesma foto da mão** e pô-la em
-   `../Ring Sample/` com um nome novo (ex.: `G58.png`).
+   `../Aneis Round 2/` com um nome novo (ex.: `R27.png`).
 2. Recortar:
 
    ```bash
-   node tools/crop-hands.js "../Ring Sample"
+   node tools/crop-hands.js "../Aneis Round 2"
    ```
 
    Faz um quadrado de 820px com a mão e as quatro unhas, com o anel um pouco
-   abaixo e à esquerda do centro, e grava `aneis/G58.jpg` a 800×800. A ideia é
+   abaixo e à esquerda do centro, e grava `aneis/R27.jpg` a 800×800. A ideia é
    ela ver o anel como se olhasse para a própria mão. A foto inteira não
    serve, porque num cartão de telemóvel o anel ficava com uns 20px. O centro
    da pedra de cada foto está na tabela
-   `CENTROS` do script. Uma foto nova usa o centro por omissão: abrir o
-   recorte e, se o anel ficar descentrado, acrescentar a entrada e voltar a
-   correr.
+   `CENTROS` do script — na ronda 2 foram detectados por cor (a pedra é a
+   única mancha verde ou azul na mão) e conferidos nos seis repescados, cujo
+   centro já tinha sido medido à mão. Uma foto nova usa o centro por omissão:
+   abrir o recorte e, se o anel ficar descentrado, acrescentar a entrada e
+   voltar a correr.
 
 3. Correr o script para acrescentar a entrada ao `rings.json`:
 
@@ -85,12 +106,14 @@ aparece do lado dela.
 
 | Campo     | Valores |
 |-----------|---------|
-| `cut`     | `round` `oval` `princess` `emerald` `pear` `marquise` `cushion` `radiant` `baguette` (forma da pedra central) |
+| `cut`     | `round` `oval` `princess` `emerald` `pear` `marquise` `cushion` `radiant` `baguette` `hexagon` `trillion` `asscher` (forma da pedra central) |
 | `setting` | `solitaire` `halo` `three-stone` `five-stone` `bezel` `cluster` `eternity` `toi-et-moi` |
+| `side`    | `none` `round` `pear` `marquise` `trillion` `baguette` `mixed` `halo` (forma das pedras laterais) |
 | `metal`   | `white-gold` `yellow-gold` `rose-gold` `platinum` `mixed` |
 | `band`    | `thin` `medium` `thick` |
 | `accent`  | `none` `pave-band` `engraved` `twisted` `split-shank` (o que está no aro) |
 | `stone`   | `colorless` `green` `sage` `mint` `teal` `blue` `pink` `milky` (cor da pedra central) |
+| `tone`    | `light` `medium` `dark` (quão escura é a pedra; `none` quando é incolor) |
 | `size`    | `small` `medium` `large` (tamanho aparente da pedra central na foto) |
 
 Sobre os verdes, que são quase metade do conjunto:
@@ -99,6 +122,11 @@ Sobre os verdes, que são quase metade do conjunto:
 - `sage` é o verde apagado, acinzentado ou oliva.
 - `mint` é o verde claro.
 - `teal` é o verde-azulado, a meio caminho entre `green` e `blue`.
+
+O `side` e o `tone` entraram na ronda 2: com tudo o resto fixo, são eles que
+distinguem os anéis uns dos outros. O `metal` e o `band` ficaram com um valor
+só (`yellow-gold`, `thin`) — não dizem nada nesta ronda, mas ficam para quando
+voltar a haver variação.
 
 O `profile` (altura da pedra) saiu no v2. Nas fotos de cima não se vê, e um
 valor adivinhado estragava a agregação em vez de ajudar.

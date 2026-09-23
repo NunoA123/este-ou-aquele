@@ -3,7 +3,7 @@
  * Recorta as fotos da mão para quadrados centrados no anel e grava-as em
  * aneis/ como JPEG 800×800. Só corre no macOS (usa o sips).
  *
- *   node tools/crop-hands.js "../Ring Sample"
+ *   node tools/crop-hands.js "../Aneis Round 2"
  *
  * O objectivo é ela ver o anel como se estivesse a olhar para a própria mão:
  * dedos, unhas, o anel no meio disso. A foto inteira é demasiado: o anel
@@ -12,9 +12,15 @@
  *
  * As fotos partem todas da mesma foto da mão, por isso a pedra está quase
  * sempre no mesmo sítio. CENTROS guarda o centro da pedra em cada foto, em px
- * da imagem original, medido a olho. Uma foto nova que não esteja na lista
- * usa DEFAULT: confirmar o recorte e, se o anel ficar descentrado, acrescentar
- * a entrada e voltar a correr.
+ * da imagem original. Os centros da ronda 2 foram detectados por cor (a pedra
+ * é a única mancha verde ou azul na mão) e conferidos nos anéis repescados,
+ * cujo centro já tinha sido medido à mão. Uma foto nova que não esteja na
+ * lista usa DEFAULT: confirmar o recorte e, se o anel ficar descentrado,
+ * acrescentar a entrada e voltar a correr.
+ *
+ * MAPA renomeia os anéis repescados da ronda 1 para o espaço de nomes da
+ * ronda 2. Sem isso, os ids repetidos apanhavam pelo caminho as linhas que
+ * esses anéis já tinham na folha, de duelos contra anéis que já não existem.
  */
 
 const fs = require('fs');
@@ -23,29 +29,27 @@ const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT_DIR = path.join(ROOT, 'aneis');
-const SRC_DIR = path.resolve(process.argv[2] || path.join(ROOT, '..', 'Ring Sample'));
+const SRC_DIR = path.resolve(process.argv[2] || path.join(ROOT, '..', 'Aneis Round 2'));
 
 const CROP = 820;          // lado do quadrado recortado, px originais
 const OUT = 800;           // lado final
 const RING_X = 0.36;       // posição da pedra no quadrado: à esquerda do centro,
 const RING_Y = 0.56;       // e abaixo, para caberem as pontas dos dedos
-const DEFAULT = [424, 610];
+const DEFAULT = [424, 630];
+
+// ficheiro de origem → id na ronda 2
+const MAPA = {
+  A1: 'R01', D25: 'R02', D26: 'R03', D27: 'R04', F50: 'R05', G56: 'R06'
+};
 
 const CENTROS = {
-  A1: [422, 616], A2: [420, 620], A3: [419, 629], A4: [418, 629], A5: [417, 630],
-  A6: [426, 606], A7: [426, 614], A8: [428, 614], A9: [424, 616], A10: [419, 602],
-  B11: [424, 600], B12: [424, 596], B13: [426, 610], B14: [426, 614], B15: [426, 622],
-  C16: [434, 606], C17: [432, 604],
-  D18: [422, 580], D19: [426, 616], D20: [425, 602], D21: [427, 582], D22: [429, 608],
-  D23: [426, 590], D24: [428, 612], D25: [423, 629], D26: [424, 624], D27: [426, 630],
-  D28: [425, 628], D29: [420, 575], D30: [422, 606], D31: [424, 608], D32: [426, 632],
-  D33: [418, 624], D34: [424, 612], D35: [420, 622], D36: [425, 614], D37: [422, 638],
-  D38: [430, 614], D39: [420, 600],
-  E40: [424, 584], E41: [424, 596], E42: [424, 584], E43: [424, 604], E44: [420, 590],
-  E45: [418, 606],
-  F46: [426, 592], F47: [420, 618], F48: [428, 588], F49: [420, 606], F50: [424, 618],
-  F51: [428, 596], F52: [416, 614], F53: [426, 628],
-  G54: [424, 612], G55: [430, 606], G56: [420, 598], G57: [426, 588]
+  R01: [422, 616], R02: [423, 629], R03: [424, 624], R04: [426, 630],
+  R05: [424, 618], R06: [420, 598],
+  R07: [428, 672], R08: [428, 646], R09: [425, 621], R10: [417, 639],
+  R12: [412, 631], R13: [430, 658], R14: [422, 649], R15: [418, 649],
+  R16: [422, 606], R17: [432, 640], R18: [421, 623], R19: [429, 625],
+  R20: [420, 631], R21: [440, 586], R22: [422, 639], R23: [434, 727],
+  R24: [435, 705], R25: [423, 634], R26: [427, 623]
 };
 
 if (!fs.existsSync(SRC_DIR)) {
@@ -58,7 +62,8 @@ const files = fs.readdirSync(SRC_DIR).filter(f => /\.(png|jpe?g)$/i.test(f)).sor
 const semCentro = [];
 
 files.forEach(f => {
-  const id = path.basename(f, path.extname(f));
+  const bruto = path.basename(f, path.extname(f));
+  const id = MAPA[bruto] || bruto;
   const [cx, cy] = CENTROS[id] || DEFAULT;
   if (!CENTROS[id]) semCentro.push(id);
 
@@ -73,7 +78,8 @@ files.forEach(f => {
   execFileSync('sips', ['-z', String(OUT), String(OUT), dest], { stdio: 'ignore' });
 
   const kb = Math.round(fs.statSync(dest).size / 1024);
-  console.log(`${id.padEnd(4)} → aneis/${id}.jpg  ${kb}KB`);
+  const origem = bruto === id ? '' : `  (era ${bruto})`;
+  console.log(`${id.padEnd(4)} → aneis/${id}.jpg  ${kb}KB${origem}`);
 });
 
 console.log(`\n${files.length} fotos recortadas.`);

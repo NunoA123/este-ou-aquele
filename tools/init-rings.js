@@ -19,12 +19,15 @@ const FORCE = process.argv.includes('--force');
 
 // manter igual ao SCHEMA do app.js
 const SCHEMA = {
-  cut:     ['round', 'oval', 'princess', 'emerald', 'pear', 'marquise', 'cushion', 'radiant', 'baguette'],
+  cut:     ['round', 'oval', 'princess', 'emerald', 'pear', 'marquise', 'cushion', 'radiant',
+            'baguette', 'hexagon', 'trillion', 'asscher'],
   setting: ['solitaire', 'halo', 'three-stone', 'five-stone', 'bezel', 'cluster', 'eternity', 'toi-et-moi'],
+  side:    ['none', 'round', 'pear', 'marquise', 'trillion', 'baguette', 'mixed', 'halo'],
   metal:   ['white-gold', 'yellow-gold', 'rose-gold', 'platinum', 'mixed'],
   band:    ['thin', 'medium', 'thick'],
   accent:  ['none', 'pave-band', 'engraved', 'twisted', 'split-shank'],
   stone:   ['colorless', 'green', 'sage', 'mint', 'teal', 'blue', 'pink', 'milky'],
+  tone:    ['none', 'light', 'medium', 'dark'],
   size:    ['small', 'medium', 'large']
 };
 const FIELDS = Object.keys(SCHEMA);

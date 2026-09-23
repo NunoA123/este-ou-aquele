@@ -10,9 +10,14 @@
 const SYNC_URL   = 'https://script.google.com/macros/s/AKfycbzIB3uKDWEd6TtZjd5gWCNHCMYnIdMu8JRF8i1gsy9I9zbBXpo9lJ46b2B2onJ6GCUzgg/exec';
 const ADMIN_PASS = 'mirtilo-quarenta-e-sete';
 
-// v2: fotos da mão dela (57 anéis). O v1 (33 fotos soltas) fica em arquivo-v1/.
-const STORAGE_KEY    = 'ringduel:state:v2';
-const STATE_VERSION  = 2;
+/* v3 (ronda 2): 25 anéis afinados a partir do que a ronda 1 ensinou — todos em
+   ouro amarelo, aro fino, pedra pequena ou média, verdes e teals. Muda o que a
+   ronda 1 não conseguiu separar: tom do verde, forma das pedras laterais,
+   feitio da pedra central. As rondas anteriores ficam em arquivo-v1/ e
+   arquivo-v2/, e os ids (R01…R26) não chocam com os delas, por isso as linhas
+   antigas continuam na folha sem se misturarem. */
+const STORAGE_KEY    = 'ringduel:state:v3';
+const STATE_VERSION  = 3;
 const SESSION_LIMIT  = 35;   // escolhas antes do ecrã de pausa
 const ELO_WINDOW     = 120;  // janela de emparelhamento na fase 2
 const PHASE1_GAMES   = 3;    // abaixo disto ainda estamos a cobrir
@@ -29,12 +34,15 @@ const NEITHER_K      = 0.5;      // metade do K de um duelo normal
 
 /* ── Valores permitidos em rings.json ─────────────────────────── */
 const SCHEMA = {
-  cut:     ['round', 'oval', 'princess', 'emerald', 'pear', 'marquise', 'cushion', 'radiant', 'baguette'],
+  cut:     ['round', 'oval', 'princess', 'emerald', 'pear', 'marquise', 'cushion', 'radiant',
+            'baguette', 'hexagon', 'trillion', 'asscher'],
   setting: ['solitaire', 'halo', 'three-stone', 'five-stone', 'bezel', 'cluster', 'eternity', 'toi-et-moi'],
+  side:    ['none', 'round', 'pear', 'marquise', 'trillion', 'baguette', 'mixed', 'halo'],
   metal:   ['white-gold', 'yellow-gold', 'rose-gold', 'platinum', 'mixed'],
   band:    ['thin', 'medium', 'thick'],
   accent:  ['none', 'pave-band', 'engraved', 'twisted', 'split-shank'],
   stone:   ['colorless', 'green', 'sage', 'mint', 'teal', 'blue', 'pink', 'milky'],
+  tone:    ['none', 'light', 'medium', 'dark'],
   size:    ['small', 'medium', 'large']
 };
 const FIELDS = Object.keys(SCHEMA);
