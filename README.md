@@ -30,7 +30,7 @@ python3 -m http.server 8000
 
 ## Versões
 
-**v3 (actual, ronda 2)**: 25 anéis, afinados com o que a ronda 1 ensinou.
+**v3 (actual, ronda 2)**: 33 anéis, afinados com o que a ronda 1 ensinou.
 Tudo o que ela já tinha decidido está fixo — ouro amarelo, aro fino, pedra
 pequena ou média, garras em vez de bezel ou halo — e o que varia é o que a
 ronda 1 não conseguiu separar: o tom do verde, a forma das pedras laterais e o
@@ -41,6 +41,33 @@ Seis anéis vieram da ronda 1 por terem ficado no topo (o 1.º, o 2.º, o 4.º, 
 renomeados** para `R01`–`R06`: com o id antigo, o admin apanhava as linhas que
 esses anéis já tinham na folha, de duelos contra 50 anéis que já não existem.
 O `MAPA` no `tools/crop-hands.js` guarda a correspondência.
+
+Depois vieram mais oito da ronda 1 (`R27`–`R34`), porque os 25 primeiros eram
+quase todos anéis com pedras laterais — 21 em 25 — e não havia com que os
+comparar. Nos 230 duelos da ronda 1, **simples contra pedras laterais deu
+28–26**: ela não prefere um ao outro, e a ronda 2 sozinha nunca conseguiria
+mostrar isso. Cada um dos oito faz três coisas ao mesmo tempo: tapa um básico
+que faltava, forma par mínimo com um anel da ronda 2, e traz a pontuação que
+já tinha para servir de régua entre as rondas.
+
+| Novo | Era | Posição na ronda 1 | Porquê |
+|---|---|---|---|
+| R27 | D18 | 7.º | o solitário mais básico; par com o R01 (mesmo anel, tamanho maior) |
+| R28 | D21 | 8.º | oval verde sem laterais; par com o R03, o R08 e o R22 |
+| R29 | D20 | 14.º | redondo verde sem laterais; par com o R02 e o R21 |
+| R30 | D22 | 21.º | redondo teal sem laterais; par com o R04 e o R25 |
+| R31 | E42 | 11.º | cinco pedras graduadas, sem pedra central |
+| R32 | E40 | 20.º | meia-aliança de diamantes, sem pedra central |
+| R33 | E41 | 26.º | meia-aliança verde; par com o R32, isola a cor numa aliança |
+| R34 | C17 | 57.º e último, 11 rejeições | controlo: se ela voltar a rejeitá-lo, as duas rondas estão a medir o mesmo |
+
+Os anéis sem pedra central entraram por causa de um número da ronda 1: as
+alianças foram **o que ela menos rejeitou, 1 vez em 32 aparições (3%)**, contra
+19% dos anéis com pedras laterais. Perdiam duelos, mas nunca desagradaram — e
+nunca foi testada uma aliança lisa contra os favoritos dela.
+
+As posições servem também de calibração: estão espalhadas do 7.º ao último, por
+isso dá para ver se a ordem se repete ou se ela mudou de ideias.
 
 **v2 (ronda 1)**: 57 anéis, todos na mesma foto da mão dela, gerados com IA.
 Como a mão, o fundo e a luz são iguais em todas, a única coisa que muda entre
