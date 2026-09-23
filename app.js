@@ -41,11 +41,12 @@ const SCHEMA = {
   metal:   ['white-gold', 'yellow-gold', 'rose-gold', 'platinum', 'mixed'],
   band:    ['thin', 'medium', 'thick'],
   accent:  ['none', 'pave-band', 'engraved', 'twisted', 'split-shank'],
-  stone:   ['colorless', 'green', 'sage', 'mint', 'teal', 'blue', 'pink', 'milky'],
+  stone:   ['colorless', 'green', 'teal', 'blue', 'pink', 'sage', 'mint', 'milky'],
   tone:    ['none', 'light', 'medium', 'dark'],
+  vividness: ['none', 'vivid', 'muted'],
   size:    ['small', 'medium', 'large']
 };
-const FIELDS = Object.keys(SCHEMA);
+const FIELDS = Object.keys(SCHEMA);   // o rings.json traz ainda "medida" e "note", que não são atributos
 
 /* ── Estado ────────────────────────────────────────────────── */
 let RINGS = [];              // [{id, img, cut, ...}]

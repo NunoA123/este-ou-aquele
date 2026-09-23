@@ -10,6 +10,7 @@
     "accent": "none",
     "stone": "colorless",
     "tone": "none",
+    "vividness": "none",
     "size": "medium",
     "note": "repescado da ronda 1 (era A1, 7.º): a referência incolor"
   },
@@ -23,9 +24,10 @@
     "band": "thin",
     "accent": "none",
     "stone": "green",
-    "tone": "medium",
+    "tone": "dark",
+    "vividness": "vivid",
     "size": "small",
-    "note": "repescado da ronda 1 (era D25, 2.º)"
+    "note": "repescado da ronda 1 (era D25, 2.º) · cor medida 131°/0.25/0.29"
   },
   {
     "id": "R03",
@@ -36,10 +38,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "none",
-    "stone": "sage",
+    "stone": "green",
     "tone": "dark",
+    "vividness": "muted",
     "size": "medium",
-    "note": "repescado da ronda 1 (era D26, 13.º)"
+    "note": "repescado da ronda 1 (era D26, 13.º) · cor medida 125°/0.14/0.25"
   },
   {
     "id": "R04",
@@ -51,9 +54,10 @@
     "band": "thin",
     "accent": "none",
     "stone": "teal",
-    "tone": "medium",
+    "tone": "dark",
+    "vividness": "vivid",
     "size": "medium",
-    "note": "repescado da ronda 1 (era D27, 14.º)"
+    "note": "repescado da ronda 1 (era D27, 14.º) · cor medida 188°/0.28/0.27"
   },
   {
     "id": "R05",
@@ -64,10 +68,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "none",
-    "stone": "sage",
+    "stone": "green",
     "tone": "medium",
+    "vividness": "vivid",
     "size": "medium",
-    "note": "repescado da ronda 1 (era F50, 4.º)"
+    "note": "repescado da ronda 1 (era F50, 4.º) · cor medida 120°/0.21/0.34"
   },
   {
     "id": "R06",
@@ -78,10 +83,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "none",
-    "stone": "sage",
+    "stone": "green",
     "tone": "light",
+    "vividness": "muted",
     "size": "small",
-    "note": "repescado da ronda 1 (era G56, 1.º)"
+    "note": "repescado da ronda 1 (era G56, 1.º) · cor medida 63°/0.16/0.48"
   },
   {
     "id": "R07",
@@ -94,8 +100,9 @@
     "accent": "none",
     "stone": "teal",
     "tone": "dark",
+    "vividness": "muted",
     "size": "medium",
-    "note": "cachos laterais de redondas e baguetes"
+    "note": "cachos laterais de redondas e baguetes · cor medida 172°/0.17/0.24"
   },
   {
     "id": "R08",
@@ -106,10 +113,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "none",
-    "stone": "sage",
+    "stone": "green",
     "tone": "dark",
+    "vividness": "vivid",
     "size": "medium",
-    "note": "trios de diamantes de cada lado"
+    "note": "trios de diamantes de cada lado · cor medida 63°/0.32/0.24"
   },
   {
     "id": "R09",
@@ -120,10 +128,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "none",
-    "stone": "teal",
+    "stone": "green",
     "tone": "medium",
+    "vividness": "muted",
     "size": "medium",
-    "note": "hexágono alongado, pedra bicolor"
+    "note": "hexágono alongado, pedra bicolor · cor medida 81°/0.17/0.31"
   },
   {
     "id": "R10",
@@ -136,8 +145,9 @@
     "accent": "none",
     "stone": "teal",
     "tone": "dark",
+    "vividness": "muted",
     "size": "medium",
-    "note": "quadrada step-cut, um diamante só de um lado"
+    "note": "quadrada step-cut, um diamante só de um lado · cor medida 180°/0.18/0.29"
   },
   {
     "id": "R12",
@@ -150,8 +160,9 @@
     "accent": "twisted",
     "stone": "green",
     "tone": "medium",
+    "vividness": "vivid",
     "size": "large",
-    "note": "marquise na diagonal, aro em bypass"
+    "note": "marquise na diagonal, aro em bypass · cor medida 75°/0.28/0.39"
   },
   {
     "id": "R13",
@@ -162,10 +173,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "none",
-    "stone": "sage",
-    "tone": "light",
+    "stone": "green",
+    "tone": "medium",
+    "vividness": "muted",
     "size": "medium",
-    "note": "folhas de marquises de cada lado"
+    "note": "folhas de marquises de cada lado · cor medida 88°/0.12/0.32"
   },
   {
     "id": "R14",
@@ -178,8 +190,9 @@
     "accent": "none",
     "stone": "green",
     "tone": "dark",
+    "vividness": "muted",
     "size": "medium",
-    "note": "verde muito escuro, bicolor"
+    "note": "verde muito escuro, bicolor · cor medida 98°/0.19/0.25"
   },
   {
     "id": "R15",
@@ -191,9 +204,10 @@
     "band": "thin",
     "accent": "none",
     "stone": "green",
-    "tone": "dark",
+    "tone": "medium",
+    "vividness": "vivid",
     "size": "medium",
-    "note": "baguetes afuniladas"
+    "note": "baguetes afuniladas · cor medida 66°/0.31/0.34"
   },
   {
     "id": "R16",
@@ -204,10 +218,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "none",
-    "stone": "mint",
+    "stone": "green",
     "tone": "light",
+    "vividness": "muted",
     "size": "small",
-    "note": "a mais pequena e mais clara do conjunto"
+    "note": "a mais pequena e mais clara do conjunto · cor medida 76°/0.12/0.46"
   },
   {
     "id": "R17",
@@ -218,10 +233,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "pave-band",
-    "stone": "mint",
+    "stone": "green",
     "tone": "light",
+    "vividness": "muted",
     "size": "small",
-    "note": "halo com pavé no aro — o halo volta a ser testado"
+    "note": "halo com pavé no aro — o halo volta a ser testado · cor medida 77°/0.18/0.47"
   },
   {
     "id": "R18",
@@ -232,10 +248,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "none",
-    "stone": "mint",
+    "stone": "green",
     "tone": "light",
+    "vividness": "vivid",
     "size": "medium",
-    "note": "trios de diamantes de cada lado"
+    "note": "trios de diamantes de cada lado · cor medida 99°/0.26/0.73"
   },
   {
     "id": "R19",
@@ -247,9 +264,10 @@
     "band": "thin",
     "accent": "none",
     "stone": "green",
-    "tone": "medium",
+    "tone": "light",
+    "vividness": "muted",
     "size": "medium",
-    "note": "pêra com pêras laterais"
+    "note": "pêra com pêras laterais · cor medida 83°/0.16/0.47"
   },
   {
     "id": "R20",
@@ -260,10 +278,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "none",
-    "stone": "teal",
+    "stone": "green",
     "tone": "dark",
+    "vividness": "muted",
     "size": "medium",
-    "note": "cushion alongada com triângulos"
+    "note": "cushion alongada com triângulos · cor medida 108°/0.12/0.25"
   },
   {
     "id": "R21",
@@ -276,8 +295,9 @@
     "accent": "none",
     "stone": "green",
     "tone": "medium",
+    "vividness": "vivid",
     "size": "small",
-    "note": "oval deitada (east-west)"
+    "note": "oval deitada (east-west) · cor medida 111°/0.21/0.34"
   },
   {
     "id": "R22",
@@ -288,10 +308,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "pave-band",
-    "stone": "teal",
-    "tone": "dark",
+    "stone": "green",
+    "tone": "medium",
+    "vividness": "muted",
     "size": "medium",
-    "note": "solitário com pavé no aro"
+    "note": "solitário com pavé no aro · cor medida 106°/0.17/0.30"
   },
   {
     "id": "R23",
@@ -303,9 +324,10 @@
     "band": "thin",
     "accent": "none",
     "stone": "green",
-    "tone": "medium",
+    "tone": "dark",
+    "vividness": "muted",
     "size": "small",
-    "note": "coroa de diamantes à volta da pêra"
+    "note": "coroa de diamantes à volta da pêra · cor medida 91°/0.17/0.24"
   },
   {
     "id": "R24",
@@ -316,10 +338,11 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "none",
-    "stone": "mint",
+    "stone": "green",
     "tone": "light",
+    "vividness": "muted",
     "size": "medium",
-    "note": "triângulo com cachos de diamantes"
+    "note": "triângulo com cachos de diamantes · cor medida 78°/0.12/0.56"
   },
   {
     "id": "R25",
@@ -332,8 +355,9 @@
     "accent": "none",
     "stone": "teal",
     "tone": "medium",
+    "vividness": "vivid",
     "size": "medium",
-    "note": "a mais azulada do conjunto"
+    "note": "a mais azulada do conjunto · cor medida 198°/0.27/0.37"
   },
   {
     "id": "R26",
@@ -344,9 +368,10 @@
     "metal": "yellow-gold",
     "band": "thin",
     "accent": "none",
-    "stone": "teal",
+    "stone": "green",
     "tone": "dark",
+    "vividness": "muted",
     "size": "medium",
-    "note": "esmeralda com baguetes"
+    "note": "esmeralda com baguetes · cor medida 142°/0.15/0.25"
   }
 ]

@@ -112,18 +112,45 @@ aparece do lado dela.
 | `metal`   | `white-gold` `yellow-gold` `rose-gold` `platinum` `mixed` |
 | `band`    | `thin` `medium` `thick` |
 | `accent`  | `none` `pave-band` `engraved` `twisted` `split-shank` (o que está no aro) |
-| `stone`   | `colorless` `green` `sage` `mint` `teal` `blue` `pink` `milky` (cor da pedra central) |
+| `stone`   | `colorless` `green` `teal` `blue` `pink` (família de cor) — `sage` `mint` `milky` só existem no arquivo |
 | `tone`    | `light` `medium` `dark` (quão escura é a pedra; `none` quando é incolor) |
+| `vividness` | `vivid` `muted` (quão viva é a cor; `none` quando é incolor) |
 | `size`    | `small` `medium` `large` (tamanho aparente da pedra central na foto) |
 
-Sobre os verdes, que são quase metade do conjunto:
+### As cores são medidas, não são a olho
 
-- `green` é o verde esmeralda saturado, claro ou escuro.
-- `sage` é o verde apagado, acinzentado ou oliva.
-- `mint` é o verde claro.
-- `teal` é o verde-azulado, a meio caminho entre `green` e `blue`.
+Na ronda 1 havia `green`, `sage` e `mint`, e a fronteira entre eles era o meu
+olho num dia bom. Isso não se aguenta: uma pedra escura e apagada tanto pode
+sair `sage` como `green` conforme a luz da foto.
 
-O `side` e o `tone` entraram na ronda 2: com tudo o resto fixo, são eles que
+Na ronda 2 a cor sai de uma medição. Amostra-se um quadrado de 46px no centro
+da pedra, deitam-se fora os pixels de metal, de diamante e de pele, e ficam
+três números — matiz, saturação e luminosidade — que decidem três campos
+independentes:
+
+| Campo | Regra |
+|---|---|
+| `stone` | matiz ≥ 150° → `teal`; abaixo → `green` |
+| `tone` | luminosidade < 0,30 → `dark`; até 0,45 → `medium`; acima → `light` |
+| `vividness` | saturação (percentil 75) ≥ 0,20 → `vivid`; abaixo → `muted` |
+
+Os três números de cada anel ficam na `note`, para se poder conferir. A
+saturação usa o percentil 75 e não a mediana porque os brilhos das facetas
+puxam a mediana para baixo e fazem qualquer pedra parecer apagada.
+
+O que isto muda, na prática: o que eu tinha chamado `sage` é hoje
+`green` + `muted`, e `mint` é `green` + `light` + `muted`. Os eixos passam a
+ser independentes, por isso a agregação consegue dizer "ela prefere escuro" e
+"ela prefere apagado" em separado, em vez de os misturar numa etiqueta só.
+
+Casos em que a medição me desmentiu: R20, R22 e R26 pareciam-me teal escuro e
+são verdes (matiz 108°, 106° e 142°). Fui ver as pedras ampliadas e a medição
+tinha razão. O R26, a 142°, é o que está mais perto da fronteira.
+
+Ficaram só quatro teals — R04, R07, R10 e R25 — e o R25 é o mais azul e o mais
+claro de todos (198°, luminosidade 0,37).
+
+O `side`, o `tone` e o `vividness` entraram na ronda 2: com tudo o resto fixo, são eles que
 distinguem os anéis uns dos outros. O `metal` e o `band` ficaram com um valor
 só (`yellow-gold`, `thin`) — não dizem nada nesta ronda, mas ficam para quando
 voltar a haver variação.
