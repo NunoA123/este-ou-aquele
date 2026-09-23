@@ -143,6 +143,35 @@ aparece do lado dela.
 | `tone`    | `light` `medium` `dark` (quão escura é a pedra; `none` quando é incolor) |
 | `vividness` | `vivid` `muted` (quão viva é a cor; `none` quando é incolor) |
 | `size`    | `small` `medium` `large` (tamanho aparente da pedra central na foto) |
+| `seed`    | opcional: Elo de partida, só nos repescados (ver abaixo) |
+
+### Elo de partida dos repescados (`seed`)
+
+Um anel novo entra a 1500. Os 14 repescados entram com o `seed` que vem no
+`rings.json`, para não se deitar fora o que já se sabe deles.
+
+O `seed` **não é** o Elo cru da ronda 1. Leva dois ajustes:
+
+1. **Recentrado.** O Elo é relativo ao grupo onde foi ganho, e os repescados
+   não são uma amostra ao calhas: são quase todos do topo, e a média deles era
+   1544 contra 1500 do conjunto. Em cru, os 19 anéis novos começavam 44 pontos
+   atrás sem terem respondido a nada — e como a fase 2 só joga na metade de
+   cima, arriscavam-se a nem ser testados.
+2. **Encolhido a metade.** Cada número saiu de 4 a 10 duelos contra um grupo de
+   anéis que já não existe. O que se aproveita é a ordem entre eles, não a
+   distância exacta.
+
+Fica, por exemplo: R06 (era o 1.º) a 1532, R27 (7.º) a 1508, R33 (26.º) a 1479,
+R34 (último) a 1417. A ordem da ronda 1 mantém-se, o espalhamento passa de
+1377–1608 para 1417–1532.
+
+Entram com **zero jogos**, por isso apanham o K mais alto e as respostas dela
+desfazem depressa um seed que esteja errado. O `seed` é usado tanto no
+telemóvel dela como no recálculo do admin, por isso os dois chegam ao mesmo
+número — foi verificado com respostas simuladas, diferença zero.
+
+Para desligar isto, apaga-se o campo `seed` do `rings.json` e todos voltam a
+1500.
 
 ### As cores são medidas, não são a olho
 

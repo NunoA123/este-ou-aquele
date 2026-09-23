@@ -60,6 +60,7 @@ const out = files.map(f => {
   const prev = byId[id];
   const rec = { id, img: 'aneis/' + f };
   FIELDS.forEach(k => { rec[k] = prev && prev[k] ? prev[k] : ''; });
+  if (prev && typeof prev.seed === 'number') rec.seed = prev.seed;   // Elo de partida dos repescados
   rec.note = (prev && prev.note) || '';
   delete byId[id];
   return rec;

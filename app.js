@@ -16,8 +16,8 @@ const ADMIN_PASS = 'mirtilo-quarenta-e-sete';
    feitio da pedra central. As rondas anteriores ficam em arquivo-v1/ e
    arquivo-v2/, e os ids (R01…R26) não chocam com os delas, por isso as linhas
    antigas continuam na folha sem se misturarem. */
-const STORAGE_KEY    = 'ringduel:state:v3';
-const STATE_VERSION  = 3;
+const STORAGE_KEY    = 'ringduel:state:v4';
+const STATE_VERSION  = 4;
 const SESSION_LIMIT  = 35;   // escolhas antes do ecrã de pausa
 const ELO_WINDOW     = 120;  // janela de emparelhamento na fase 2
 const PHASE1_GAMES   = 3;    // abaixo disto ainda estamos a cobrir
@@ -48,6 +48,30 @@ const SCHEMA = {
 };
 const FIELDS = Object.keys(SCHEMA);   // o rings.json traz ainda "medida" e "note", que não são atributos
 
+/**
+ * Elo de partida de um anel. 1500 para quem nunca jogou; para os repescados,
+ * o "seed" que vem no rings.json.
+ *
+ * O seed não é o Elo cru da ronda 1. Leva dois ajustes, senão dava-lhes uma
+ * vantagem que não ganharam:
+ *
+ *  1. Recentrado. O Elo é relativo ao grupo onde foi ganho, e os 14 repescados
+ *     não são uma amostra ao calhas da ronda 1: são quase todos do topo, e a
+ *     média deles era 1544 contra 1500 do conjunto. Importado em cru, os 19
+ *     anéis novos começavam 44 pontos atrás sem terem respondido a nada.
+ *  2. Encolhido a metade. Cada um destes números saiu de 4 a 10 duelos contra
+ *     um grupo de anéis que já não existe. O que se aproveita é a ordem entre
+ *     eles, não a distância exacta.
+ *
+ * Resultado: mantêm a ordem da ronda 1 (o G56 à frente, o C17 no fundo) sem
+ * partirem à frente do resto. Como entram com zero jogos, o K é o mais alto e
+ * as respostas dela desfazem depressa um seed que esteja errado.
+ */
+const seedOf = (id) => {
+  const r = RING_BY_ID[id];
+  return r && typeof r.seed === 'number' ? r.seed : 1500;
+};
+
 /* ── Estado ────────────────────────────────────────────────── */
 let RINGS = [];              // [{id, img, cut, ...}]
 let RING_BY_ID = {};
@@ -76,7 +100,7 @@ function blankState() {
     playoffIds: null,
     sessionCount: 0
   };
-  RINGS.forEach(r => { s.ratings[r.id] = 1500; s.games[r.id] = 0; s.wins[r.id] = 0; s.neither[r.id] = 0; });
+  RINGS.forEach(r => { s.ratings[r.id] = seedOf(r.id); s.games[r.id] = 0; s.wins[r.id] = 0; s.neither[r.id] = 0; });
   return s;
 }
 
@@ -87,7 +111,7 @@ function load() {
   // anéis novos adicionados depois de a sessão começar
   s.neither = s.neither || {};
   RINGS.forEach(r => {
-    if (typeof s.ratings[r.id] !== 'number') { s.ratings[r.id] = 1500; s.games[r.id] = 0; s.wins[r.id] = 0; }
+    if (typeof s.ratings[r.id] !== 'number') { s.ratings[r.id] = seedOf(r.id); s.games[r.id] = 0; s.wins[r.id] = 0; }
     if (typeof s.neither[r.id] !== 'number') s.neither[r.id] = 0;
   });
   s.history = s.history || [];
@@ -544,6 +568,9 @@ function validateRings(list) {
     seen.add(r.id);
     if (!r.img) console.warn(`rings.json[${r.id}]: falta "img"`);
     FIELDS.forEach(f => {
+      if (r.seed !== undefined && (typeof r.seed !== 'number' || r.seed < 1000 || r.seed > 2000)) {
+        console.warn(`rings.json[${r.id}]: "seed" = ${r.seed} não é um Elo plausível`);
+      }
       if (r[f] === undefined || r[f] === null || r[f] === '') {
         console.warn(`rings.json[${r.id}]: campo obrigatório "${f}" vazio`);
       } else if (!SCHEMA[f].includes(r[f])) {
@@ -717,7 +744,7 @@ function normalizeRemote(raw) {
 /** Recalcula tudo do zero a partir das linhas. */
 function recompute(rows) {
   const ratings = {}, games = {}, wins = {}, losses = {}, neither = {};
-  RINGS.forEach(r => { ratings[r.id] = 1500; games[r.id] = 0; wins[r.id] = 0; losses[r.id] = 0; neither[r.id] = 0; });
+  RINGS.forEach(r => { ratings[r.id] = seedOf(r.id); games[r.id] = 0; wins[r.id] = 0; losses[r.id] = 0; neither[r.id] = 0; });
 
   const h2h = {};   // h2h[a][b] = vitórias de a sobre b
   let skips = 0, used = 0, unknown = 0;
@@ -752,8 +779,8 @@ function aggregate(calc) {
       const bk = buckets[v] || (buckets[v] = { value: v, rings: 0, games: 0, wsum: 0 });
       bk.rings++;
       bk.games += respostas(r.id);
-      bk.wsum  += (calc.ratings[r.id] || 1500) * respostas(r.id);
-      bk.plain = (bk.plain || 0) + (calc.ratings[r.id] || 1500);
+      bk.wsum  += (calc.ratings[r.id] || seedOf(r.id)) * respostas(r.id);
+      bk.plain = (bk.plain || 0) + (calc.ratings[r.id] || seedOf(r.id));
     });
     out[f] = Object.values(buckets).map(bk => ({
       value: bk.value,

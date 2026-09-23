@@ -12,6 +12,7 @@
     "tone": "none",
     "vividness": "none",
     "size": "medium",
+    "seed": 1512,
     "note": "repescado da ronda 1 (era A1, 7.º): a referência incolor"
   },
   {
@@ -27,6 +28,7 @@
     "tone": "dark",
     "vividness": "vivid",
     "size": "small",
+    "seed": 1522,
     "note": "repescado da ronda 1 (era D25, 2.º) · cor medida 131°/0.25/0.29"
   },
   {
@@ -42,6 +44,7 @@
     "tone": "dark",
     "vividness": "muted",
     "size": "medium",
+    "seed": 1522,
     "note": "repescado da ronda 1 (era D26, 13.º) · cor medida 125°/0.14/0.25"
   },
   {
@@ -57,6 +60,7 @@
     "tone": "dark",
     "vividness": "vivid",
     "size": "medium",
+    "seed": 1522,
     "note": "repescado da ronda 1 (era D27, 14.º) · cor medida 188°/0.28/0.27"
   },
   {
@@ -72,6 +76,7 @@
     "tone": "medium",
     "vividness": "vivid",
     "size": "medium",
+    "seed": 1527,
     "note": "repescado da ronda 1 (era F50, 4.º) · cor medida 120°/0.21/0.34"
   },
   {
@@ -87,6 +92,7 @@
     "tone": "light",
     "vividness": "muted",
     "size": "small",
+    "seed": 1532,
     "note": "repescado da ronda 1 (era G56, 1.º) · cor medida 63°/0.16/0.48"
   },
   {
@@ -387,6 +393,7 @@
     "tone": "none",
     "vividness": "none",
     "size": "small",
+    "seed": 1508,
     "note": "repescado (era D18, 7.º na ronda 1): o solitário mais básico de todos; par com o R01 para isolar o tamanho"
   },
   {
@@ -402,6 +409,7 @@
     "tone": "dark",
     "vividness": "vivid",
     "size": "medium",
+    "seed": 1505,
     "note": "repescado (era D21, 8.º): oval verde sem laterais; par com o R03, R08 e R22 · cor medida 150°/0.25/0.26"
   },
   {
@@ -417,6 +425,7 @@
     "tone": "dark",
     "vividness": "vivid",
     "size": "medium",
+    "seed": 1490,
     "note": "repescado (era D20, 14.º): redondo verde sem laterais; par com o R02 e o R21 · cor medida 136°/0.25/0.24"
   },
   {
@@ -432,6 +441,7 @@
     "tone": "medium",
     "vividness": "vivid",
     "size": "medium",
+    "seed": 1482,
     "note": "repescado (era D22, 21.º): redondo teal sem laterais; par com o R04 e o R25 · cor medida 178°/0.25/0.30"
   },
   {
@@ -447,6 +457,7 @@
     "tone": "none",
     "vividness": "none",
     "size": "small",
+    "seed": 1500,
     "note": "repescado (era E42, 11.º): cinco diamantes graduados, sem pedra central — o melhor dos \"sem pedra\""
   },
   {
@@ -462,6 +473,7 @@
     "tone": "none",
     "vividness": "none",
     "size": "small",
+    "seed": 1483,
     "note": "repescado (era E40, 20.º): meia-aliança de diamantes, sem pedra central"
   },
   {
@@ -477,6 +489,7 @@
     "tone": "medium",
     "vividness": "vivid",
     "size": "small",
+    "seed": 1479,
     "note": "repescado (era E41, 26.º): meia-aliança verde; par com o R32 para isolar a cor numa aliança · cor medida 137°/0.28/0.39"
   },
   {
@@ -492,6 +505,7 @@
     "tone": "dark",
     "vividness": "vivid",
     "size": "large",
+    "seed": 1417,
     "note": "repescado (era C17, 57.º e último, com 11 rejeições): controlo — se ela voltar a rejeitá-lo, a ronda 2 está a medir o mesmo que a ronda 1; par com o R17, que é um halo pequeno e claro"
   }
 ]
