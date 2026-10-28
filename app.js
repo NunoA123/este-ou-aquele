@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════
-   Anel da Karolina ♡  —  duelo de anéis com ranking Elo
+   Anel da Karolina ♡  —  duelo par-a-par com ranking Elo
    ══════════════════════════════════════════════════════════════ */
 
 /* ── Configuração ──────────────────────────────────────────────
@@ -10,14 +10,14 @@
 const SYNC_URL   = 'https://script.google.com/macros/s/AKfycbzIB3uKDWEd6TtZjd5gWCNHCMYnIdMu8JRF8i1gsy9I9zbBXpo9lJ46b2B2onJ6GCUzgg/exec';
 const ADMIN_PASS = 'mirtilo-quarenta-e-sete';
 
-/* v3 (ronda 2): 25 anéis afinados a partir do que a ronda 1 ensinou — todos em
-   ouro amarelo, aro fino, pedra pequena ou média, verdes e teals. Muda o que a
-   ronda 1 não conseguiu separar: tom do verde, forma das pedras laterais,
-   feitio da pedra central. As rondas anteriores ficam em arquivo-v1/ e
-   arquivo-v2/, e os ids (R01…R26) não chocam com os delas, por isso as linhas
-   antigas continuam na folha sem se misturarem. */
-const STORAGE_KEY    = 'ringduel:state:v5';
-const STATE_VERSION  = 5;
+/* v4 (ronda 3): já não são anéis, são 25 safiras verdes à venda, cada uma com
+   ficha — quilates, milímetros, cor, intensidade, tratamento, origem e preço.
+   Ela escolhe pela foto; a ficha serve para a agregação do lado do dono.
+   Reset total: ids novos (P01…P46), chave de localStorage nova, e as rondas
+   anteriores ficam em arquivo-v1/, arquivo-v2/ e arquivo-v3/. As linhas
+   antigas continuam na folha e o admin conta-as à parte. */
+const STORAGE_KEY    = 'ringduel:state:v6';
+const STATE_VERSION  = 6;
 const SESSION_LIMIT  = 35;   // escolhas antes do ecrã de pausa
 const ELO_WINDOW     = 120;  // janela de emparelhamento na fase 2
 const PHASE1_GAMES   = 3;    // abaixo disto ainda estamos a cobrir
@@ -33,20 +33,21 @@ const NEITHER_BAR    = 1500;     // a fasquia: o anel médio
 const NEITHER_K      = 0.5;      // metade do K de um duelo normal
 
 /* ── Valores permitidos em rings.json ─────────────────────────── */
+/* Tudo isto vem da ficha de cada pedra (tools/pedras.csv), menos o `tone` e o
+   `vividness`, que são medidos na própria foto como na ronda 2. O `price`, o
+   `treatment` e a `origin` ela nunca vê — servem para saber quanto custa o
+   gosto dela e se distingue uma pedra tratada de uma por tratar. */
 const SCHEMA = {
-  cut:     ['round', 'oval', 'princess', 'emerald', 'pear', 'marquise', 'cushion', 'radiant',
-            'baguette', 'hexagon', 'trillion', 'asscher'],
-  setting: ['solitaire', 'halo', 'three-stone', 'five-stone', 'bezel', 'cluster', 'eternity', 'toi-et-moi'],
-  side:    ['none', 'round', 'pear', 'marquise', 'trillion', 'baguette', 'mixed', 'halo'],
-  metal:   ['white-gold', 'yellow-gold', 'rose-gold', 'platinum', 'mixed'],
-  band:    ['thin', 'medium', 'thick'],
-  accent:  ['none', 'pave-band', 'engraved', 'twisted', 'split-shank'],
-  stone:   ['colorless', 'green', 'teal', 'blue', 'pink', 'sage', 'mint', 'milky'],
-  tone:    ['none', 'light', 'medium', 'dark'],
-  vividness: ['none', 'vivid', 'muted'],
-  size:    ['small', 'medium', 'large']
+  color:     ['green', 'yellowish-green', 'greenish-yellow', 'parti'],
+  intensity: ['light', 'medium', 'intense', 'vivid', 'dark'],
+  size:      ['small', 'medium', 'large'],          // < 1 ct · 1–2,5 ct · > 2,5 ct
+  treatment: ['heat', 'none'],
+  origin:    ['madagascar', 'montana', 'ceylon', 'kenya', 'australia'],
+  price:     ['budget', 'mid', 'high', 'premium'],  // < 500 · < 2000 · < 5000 · 5000+ USD
+  tone:      ['light', 'medium', 'dark'],           // medidos na foto, não na ficha
+  vividness: ['vivid', 'muted']
 };
-const FIELDS = Object.keys(SCHEMA);   // o rings.json traz ainda "medida" e "note", que não são atributos
+const FIELDS = Object.keys(SCHEMA);   // o rings.json traz ainda ct, mm, usd, item, hsl e note, que não são atributos
 
 /**
  * Elo de partida de um anel. 1500 para quem nunca jogou; para os repescados,
@@ -108,7 +109,7 @@ function load() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch (e) { s = null; }
   if (!s || s.version !== STATE_VERSION) return blankState();
-  // anéis novos adicionados depois de a sessão começar
+  // pedras novas adicionadas depois de a sessão começar
   s.neither = s.neither || {};
   RINGS.forEach(r => {
     if (typeof s.ratings[r.id] !== 'number') { s.ratings[r.id] = seedOf(r.id); s.games[r.id] = 0; s.wins[r.id] = 0; }
@@ -189,7 +190,7 @@ function applyResult(ratings, games, wins, a, b, winner) {
 }
 
 /**
- * "Nenhum dos dois": ela rejeitou os dois anéis do par.
+ * "Nenhum dos dois": ela rejeitou as duas do par.
  *
  * Diz alguma coisa sobre cada anel — está abaixo da fasquia — e nada sobre
  * qual dos dois é melhor. Por isso nenhum ganha ao outro: cada um perde
@@ -262,9 +263,9 @@ function playoffIds() {
 }
 
 /**
- * A metade de cima da tabela — os anéis que a fase 2 disputa.
+ * A metade de cima da tabela — o que a fase 2 disputa.
  *
- * Depois da cobertura, ordenar os anéis que ela não quer não serve para nada:
+ * Depois da cobertura, ordenar o que ela não quer não serve para nada:
  * o que interessa é saber qual é o primeiro. Sem este corte, a janela de ±120
  * punha o fundo da tabela a jogar contra o fundo da tabela, e ela lá ia
  * rejeitar os dois outra vez.
@@ -850,10 +851,10 @@ function renderAdmin(rows, source) {
   html += '<h2>Estado</h2><table>' +
     row2('comparações contadas', calc.used) +
     row2('"nenhum dos dois" contados', calc.skips) +
-    row2('linhas de anéis que já não existem (v1)', calc.unknown) +
-    row2('anéis', RINGS.length) +
-    row2('aparições por anel — mínimo', minG) +
-    row2('aparições por anel — média', n(avgG, 2)) +
+    row2('linhas de rondas anteriores (anéis)', calc.unknown) +
+    row2('pedras', RINGS.length) +
+    row2('aparições por pedra — mínimo', minG) +
+    row2('aparições por pedra — média', n(avgG, 2)) +
     row2('fase actual', phase) +
     '</table>';
 
@@ -869,10 +870,10 @@ function renderAdmin(rows, source) {
   /* 2. Agregação por atributo — a secção mais importante */
   html += '<h2>Agregação por atributo</h2>';
   html += '<p class="muted">Elo médio ponderado pelas respostas (duelos + "nenhum dos dois"). ' +
-          '<span class="weak">A vermelho</span> = menos de 3 anéis ou menos de 10 jogos: pouco fiável.</p>';
+          '<span class="weak">A vermelho</span> = menos de 3 pedras ou menos de 10 respostas: pouco fiável.</p>';
   html += '<div class="grid">';
   FIELDS.forEach(f => {
-    html += '<div><table><thead><tr><th>' + f + '</th><th class="num">elo</th><th class="num">anéis</th><th class="num">jogos</th></tr></thead><tbody>';
+    html += '<div><table><thead><tr><th>' + f + '</th><th class="num">elo</th><th class="num">pedras</th><th class="num">respostas</th></tr></thead><tbody>';
     agg[f].forEach(b => {
       html += '<tr class="' + (b.weak ? 'weak' : '') + '"><td>' + b.value + '</td>' +
               '<td class="num">' + n(b.elo) + '</td>' +
@@ -893,9 +894,9 @@ function renderAdmin(rows, source) {
     html += '</tbody></table>';
   }
 
-  /* 1. Tabela de anéis */
-  html += '<h2>Anéis por Elo</h2><div class="scroll"><table><thead><tr>' +
-    '<th>#</th><th>foto</th><th>id</th><th>foco</th><th class="num">elo</th><th class="num">jogos</th><th class="num">v-d</th><th class="num">nenhum</th>' +
+  /* 1. Tabela das pedras */
+  html += '<h2>Pedras por Elo</h2><div class="scroll"><table><thead><tr>' +
+    '<th>#</th><th>foto</th><th>id</th><th>foco</th><th class="num">elo</th><th class="num">duelos</th><th class="num">v-d</th><th class="num">nenhum</th>' +
     FIELDS.map(f => '<th>' + f + '</th>').join('') + '<th>note</th></tr></thead><tbody>';
   ordered.forEach((r, i) => {
     html += '<tr><td class="num">' + (i + 1) + '</td>' +

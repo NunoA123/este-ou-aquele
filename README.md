@@ -1,22 +1,30 @@
 # Anel da Karolina ♡
 
-Comparações par-a-par de anéis com ranking Elo. Ela vê duas fotos e escolhe uma.
-O resultado útil não é "ganhou o anel #7" — é a agregação por atributo: que
-lapidação, que metal, que engaste, que espessura de aro é que ela escolhe
-consistentemente. Isso vê-se na vista de admin.
+Comparações par-a-par com ranking Elo. Ela vê duas fotos e escolhe uma.
+
+O resultado útil nunca é "ganhou a número 7" — é a agregação por atributo: que
+cor, que intensidade, que tamanho é que ela escolhe consistentemente. Isso
+vê-se na vista de admin.
+
+Na ronda 3 já não são anéis, são **pedras à venda**: 25 safiras verdes, cada
+uma com a ficha do vendedor. É a ronda que fecha o assunto — o que sair daqui
+é o que se leva ao ourives.
 
 ```
 index.html      a app toda (marcação)
 app.js          lógica: Elo, emparelhamento, sincronização, vista de admin
 style.css       estilo
-rings.json      atributos de cada anel  ← preenchido à mão
-aneis/          fotos R01.jpg … R26.jpg (800×800, recortes da mão dela)
-arquivo-v1/     os 33 anéis da primeira versão (fotos soltas) e o rings.json deles
-arquivo-v2/     os 57 anéis da ronda 1 e o rings.json deles
+rings.json      ficha de cada pedra  ← gerado a partir do tools/pedras.csv
+pedras/         fotos P01.jpg … P46.jpg (800×800)
+arquivo-v1/     os 33 anéis da primeira versão (fotos soltas)
+arquivo-v2/     os 57 anéis da ronda 1, na mão dela
+arquivo-v3/     os 39 anéis da ronda 2
 tools/
-  crop-hands.js recorta as fotos da mão para aneis/
-  init-rings.js script que varre aneis/ e gera o stub do rings.json
-  Code.gs       backend Google Apps Script
+  pedras.csv    a ficha do vendedor, uma linha por pedra
+  prep-stones.js normaliza as fotos para pedras/
+  init-rings.js  varre pedras/ e confere contra a ficha
+  crop-hands.js  recortava as fotos da mão (rondas 1 e 2, já arquivadas)
+  Code.gs        backend Google Apps Script
 ```
 
 Sem build, sem npm, sem dependências. Abrir o `index.html` através de um
@@ -30,126 +38,69 @@ python3 -m http.server 8000
 
 ## Versões
 
-**v3 (actual, ronda 2)**: 39 anéis, afinados com o que a ronda 1 ensinou.
-Tudo o que ela já tinha decidido está fixo — ouro amarelo, aro fino, pedra
-pequena ou média, garras em vez de bezel ou halo — e o que varia é o que a
-ronda 1 não conseguiu separar: o tom do verde, a forma das pedras laterais e o
-feitio da pedra central. Fotos originais em `../Aneis Round 2/`.
+**v4 (actual, ronda 3): já não são anéis, são pedras.** 25 safiras verdes à
+venda no The Natural Sapphire Company, cada uma com ficha: quilates,
+milímetros, cor, intensidade, tratamento, origem e preço. Ela escolhe pela
+foto e não vê nada disto; a ficha serve para a agregação do lado do dono —
+é o que transforma "gosta desta" em "gosta de verdes médios de 1 a 2 quilates,
+e isso custa X".
 
-Seis anéis vieram da ronda 1 por terem ficado no topo (o 1.º, o 2.º, o 4.º, o
-7.º, o 13.º e o 14.º) e servem de âncora entre as duas rondas. **Foram
-renomeados** para `R01`–`R06`: com o id antigo, o admin apanhava as linhas que
-esses anéis já tinham na folha, de duelos contra 50 anéis que já não existem.
-O `MAPA` no `tools/crop-hands.js` guarda a correspondência.
+As fotos originais vêm de uma pasta do Google Drive e a ficha está em
+`tools/pedras.csv`, que é de onde o `rings.json` é gerado.
 
-Depois vieram mais oito da ronda 1 (`R27`–`R34`), porque os 25 primeiros eram
-quase todos anéis com pedras laterais — 21 em 25 — e não havia com que os
-comparar. Nos 230 duelos da ronda 1, **simples contra pedras laterais deu
-28–26**: ela não prefere um ao outro, e a ronda 2 sozinha nunca conseguiria
-mostrar isso. Cada um dos oito faz três coisas ao mesmo tempo: tapa um básico
-que faltava, forma par mínimo com um anel da ronda 2, e traz a pontuação que
-já tinha para servir de régua entre as rondas.
+Reset total em relação aos anéis: ids novos (`P01`–`P46`, do nome do ficheiro),
+chave de `localStorage` nova (`ringduel:state:v6`), e nada de seeds — todas as
+pedras partem de 1500. As rondas anteriores ficam em `arquivo-v1/` (33 anéis de
+fotos soltas), `arquivo-v2/` (57 anéis na mão dela) e `arquivo-v3/` (os 39 da
+ronda 2). As linhas delas continuam na Google Sheet; o admin ignora ids que já
+não existem e conta-os à parte.
 
-| Novo | Era | Posição na ronda 1 | Porquê |
-|---|---|---|---|
-| R27 | D18 | 7.º | o solitário mais básico; par com o R01 (mesmo anel, tamanho maior) |
-| R28 | D21 | 8.º | oval verde sem laterais; par com o R03, o R08 e o R22 |
-| R29 | D20 | 14.º | redondo verde sem laterais; par com o R02 e o R21 |
-| R30 | D22 | 21.º | redondo teal sem laterais; par com o R04 e o R25 |
-| R31 | E42 | 11.º | cinco pedras graduadas, sem pedra central |
-| R32 | E40 | 20.º | meia-aliança de diamantes, sem pedra central |
-| R33 | E41 | 26.º | meia-aliança verde; par com o R32, isola a cor numa aliança |
-| R34 | C17 | 57.º e último, 11 rejeições | controlo: se ela voltar a rejeitá-lo, as duas rondas estão a medir o mesmo |
+### Campos (vêm todos da ficha do vendedor)
 
-Os anéis sem pedra central entraram por causa de um número da ronda 1: as
-alianças foram **o que ela menos rejeitou, 1 vez em 32 aparições (3%)**, contra
-19% dos anéis com pedras laterais. Perdiam duelos, mas nunca desagradaram — e
-nunca foi testada uma aliança lisa contra os favoritos dela.
+| Campo | Valores |
+|---|---|
+| `color` | `green` `yellowish-green` `greenish-yellow` `parti` |
+| `intensity` | `light` `medium` `intense` `vivid` `dark` |
+| `size` | `small` (< 1 ct) `medium` (1–2,5 ct) `large` (> 2,5 ct) |
+| `treatment` | `heat` (aquecida) `none` (sem tratamento) |
+| `origin` | `madagascar` `montana` `ceylon` `kenya` `australia` |
+| `price` | `budget` (< 500) `mid` (< 2000) `high` (< 5000) `premium` (5000+ USD) |
 
-As posições servem também de calibração: estão espalhadas do 7.º ao último, por
-isso dá para ver se a ordem se repete ou se ela mudou de ideias.
+Cada pedra guarda ainda os valores exactos (`ct`, `mm`, `usd`, `item`) e uma
+`note` com a ficha toda. O `item` é a referência do vendedor, para ires lá
+buscá-la.
 
-E uma terceira leva (`R35`–`R40`), desta vez escolhida por um critério
-diferente: anéis que ficaram bem classificados na ronda 1 **sem nunca terem
-enfrentado os favoritos**. A pontuação deles assentava em duelos contra o meio
-da tabela, por isso valia pouco.
+Três destes campos ela nunca vê, e são os mais interessantes:
 
-| Novo | Era | Posição | Porquê |
-|---|---|---|---|
-| R35 | D30 | 13.º | três pedras em incolor: separa "gosta de três pedras" de "gosta de verde", que na ronda 2 andavam sempre juntos |
-| R36 | D29 | 12.º | o único azul; **nunca tinha enfrentado nenhum** dos oito favoritos |
-| R37 | G57 | 23.º | o único com o aro trabalhado (milgrain); dos 33 anteriores, 29 tinham o aro liso |
-| R38 | D19 | 10.º | diamante contra verde no mesmo oval; par com o R28 |
-| R39 | D28 | 9.º | o melhor classificado que tinha ficado de fora |
-| R40 | F48 | 16.º | cushion clara em solitário; 16.º sem nunca ter enfrentado um favorito |
-
-Com isto o incolor passa de 4 para 6 anéis e deixa de ser uma nota de rodapé:
-no modelo da ronda 1, incolor e verde eram indistinguíveis, e essa é a pergunta
-mais cara de todas.
-
-**O que a repescagem não resolve: o metal.** O conjunto é 100% ouro amarelo. A
-ronda 1 dizia que o ouro branco perdia 31–1, mas os 8 anéis em ouro branco
-tinham todos outra característica perdedora — três bezel, um halo, dois
-lapidação esmeralda, um azul, um menta. Importar um deles repetia o erro em vez
-de o corrigir. Para fechar o metal era preciso gerar duas versões em ouro
-branco de anéis que ela já mostrou gostar.
-
-**v2 (ronda 1)**: 57 anéis, todos na mesma foto da mão dela, gerados com IA.
-Como a mão, o fundo e a luz são iguais em todas, a única coisa que muda entre
-dois cartões é o anel. As fotos originais estão em `../Ring Sample/`. O nome
-de cada ficheiro (`A1`, `D38`…) é o `id` do anel.
-
-O que ela respondeu na ronda 1 (125 duelos e 35 rejeições) fica em
-`arquivo-v2/` e na folha.
-
-**v1**: 33 fotos soltas da internet, em `arquivo-v1/`. As 177 escolhas desse
-período continuam na Google Sheet.
-
-Cada ronda tem a sua chave de `localStorage` (`ringduel:state:v3` agora), por
-isso o telemóvel dela recomeça do zero, e as linhas das rondas anteriores
-continuam na folha sem se misturarem: o admin ignora ids que já não existem e
-conta-os à parte.
+- **`price`** diz quanto custa o gosto dela. As 25 pedras vão de 109 a 10 285
+  dólares.
+- **`treatment`** diz se ela distingue uma safira aquecida de uma por tratar.
+  Estão 13 contra 12, quase meio a meio — se a preferência sair ao acaso, é
+  porque não distingue, e isso poupa muito dinheiro.
+- **`origin`** diz o mesmo quanto à proveniência (Montana custa mais).
 
 ---
 
-## Adicionar ou substituir imagens
+## Adicionar ou substituir pedras
 
-1. Gerar a foto nova a partir da **mesma foto da mão** e pô-la em
-   `../Aneis Round 2/` com um nome novo (ex.: `R27.png`).
-2. Recortar:
-
-   ```bash
-   node tools/crop-hands.js "../Aneis Round 2"
-   ```
-
-   Faz um quadrado de 820px com a mão e as quatro unhas, com o anel um pouco
-   abaixo e à esquerda do centro, e grava `aneis/R27.jpg` a 800×800. A ideia é
-   ela ver o anel como se olhasse para a própria mão. A foto inteira não
-   serve, porque num cartão de telemóvel o anel ficava com uns 20px. O centro
-   da pedra de cada foto está na tabela
-   `CENTROS` do script — na ronda 2 foram detectados por cor (a pedra é a
-   única mancha verde ou azul na mão) e conferidos nos seis repescados, cujo
-   centro já tinha sido medido à mão. Uma foto nova usa o centro por omissão:
-   abrir o recorte e, se o anel ficar descentrado, acrescentar a entrada e
-   voltar a correr.
-
-3. Correr o script para acrescentar a entrada ao `rings.json`:
+1. Pôr as fotos numa pasta, com o nome `pedra-NN.jpg`.
+2. Normalizar:
 
    ```bash
-   node tools/init-rings.js
+   node tools/prep-stones.js "../Pedras"
    ```
 
-   Não mexe no que já estiver preenchido. Só acrescenta as entradas novas, com
-   os campos vazios, e no fim diz o que falta preencher.
+   Corta ao quadrado pelo centro e reduz a 800×800. Não há recorte a inventar
+   como havia nas fotos da mão: as fotos do vendedor já são a pedra ao centro
+   sobre fundo liso. O que importa é ficarem **todas do mesmo tamanho**, senão
+   a arena deixa de ser simétrica e ela escolhe a foto em vez da pedra. Uma
+   pedra pequena continua pequena no cartão, e isso é informação verdadeira —
+   o tamanho é um dos atributos a medir.
 
-Um anel novo entra a 1500 e o emparelhamento dá-lhe prioridade até ter jogos
-suficientes, por isso pode entrar a meio sem estragar os dados.
+3. Acrescentar a linha ao `tools/pedras.csv` e voltar a gerar o `rings.json`.
+   O `node tools/init-rings.js` confere que todas as pedras com foto têm ficha
+   e ao contrário.
 
-> Se uma foto for muito diferente das outras — mão em vez de estúdio, fundo
-> radicalmente distinto, marca de água grande — a escolha dela passa a ser sobre
-> a foto e não sobre o anel. Vale a pena substituí-la.
-
----
 
 ## Preencher o `rings.json`
 

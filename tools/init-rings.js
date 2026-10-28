@@ -13,28 +13,25 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const IMG_DIR = path.join(ROOT, 'aneis');
+const IMG_DIR = path.join(ROOT, 'pedras');
 const OUT = path.join(ROOT, 'rings.json');
 const FORCE = process.argv.includes('--force');
 
 // manter igual ao SCHEMA do app.js
 const SCHEMA = {
-  cut:     ['round', 'oval', 'princess', 'emerald', 'pear', 'marquise', 'cushion', 'radiant',
-            'baguette', 'hexagon', 'trillion', 'asscher'],
-  setting: ['solitaire', 'halo', 'three-stone', 'five-stone', 'bezel', 'cluster', 'eternity', 'toi-et-moi'],
-  side:    ['none', 'round', 'pear', 'marquise', 'trillion', 'baguette', 'mixed', 'halo'],
-  metal:   ['white-gold', 'yellow-gold', 'rose-gold', 'platinum', 'mixed'],
-  band:    ['thin', 'medium', 'thick'],
-  accent:  ['none', 'pave-band', 'engraved', 'twisted', 'split-shank'],
-  stone:   ['colorless', 'green', 'teal', 'blue', 'pink', 'sage', 'mint', 'milky'],
-  tone:    ['none', 'light', 'medium', 'dark'],
-  vividness: ['none', 'vivid', 'muted'],
-  size:    ['small', 'medium', 'large']
+  color:     ['green', 'yellowish-green', 'greenish-yellow', 'parti'],
+  intensity: ['light', 'medium', 'intense', 'vivid', 'dark'],
+  size:      ['small', 'medium', 'large'],
+  treatment: ['heat', 'none'],
+  origin:    ['madagascar', 'montana', 'ceylon', 'kenya', 'australia'],
+  price:     ['budget', 'mid', 'high', 'premium'],  // < 500 · < 2000 · < 5000 · 5000+ USD
+  tone:      ['light', 'medium', 'dark'],           // medidos na foto, não na ficha
+  vividness: ['vivid', 'muted']
 };
 const FIELDS = Object.keys(SCHEMA);
 
 if (!fs.existsSync(IMG_DIR)) {
-  console.error('Não existe a pasta aneis/');
+  console.error('Não existe a pasta pedras/');
   process.exit(1);
 }
 
@@ -58,9 +55,9 @@ existing.forEach(r => { if (r && r.id) byId[r.id] = r; });
 const out = files.map(f => {
   const id = path.basename(f, path.extname(f));
   const prev = byId[id];
-  const rec = { id, img: 'aneis/' + f };
+  const rec = { id, img: 'pedras/' + f };
   FIELDS.forEach(k => { rec[k] = prev && prev[k] ? prev[k] : ''; });
-  if (prev && typeof prev.seed === 'number') rec.seed = prev.seed;   // Elo de partida dos repescados
+  ['ct', 'mm', 'usd', 'item', 'hsl'].forEach(k => { if (prev && prev[k] !== undefined) rec[k] = prev[k]; });
   rec.note = (prev && prev.note) || '';
   delete byId[id];
   return rec;
@@ -79,7 +76,7 @@ out.forEach(r => {
 });
 
 console.log(`rings.json escrito com ${out.length} anéis.`);
-Object.keys(byId).forEach(id => console.log(`  aviso: "${id}" está no rings.json mas já não tem imagem em aneis/`));
+Object.keys(byId).forEach(id => console.log(`  aviso: "${id}" está no rings.json mas já não tem imagem em pedras/`));
 if (invalid.length) {
   console.log(`\n  ${invalid.length} valor(es) fora das listas permitidas:`);
   invalid.forEach(s => console.log('    ' + s));
